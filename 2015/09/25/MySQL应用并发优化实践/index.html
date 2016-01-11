@@ -1,0 +1,258 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>【原创】MySQL应用并发优化实践 | Hexo</title>
+  <meta name="author" content="John Doe">
+  
+  <meta name="description" content="##测试环境应用结构：JWS+2次库表写入+分库分表目标：TPS=5000测试工具：Jmeter、Sysbench并发线程：16
+##性能目标TPS&amp;gt;=5000
+##现状采用Jmeter在16并发场景下测试2分钟，最终并发在1200-1300之间，距离性能目标比较遥远。
+##优化过程
+
+首先考">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="【原创】MySQL应用并发优化实践"/>
+  <meta property="og:site_name" content="Hexo"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  
+  
+    <link href="/favicon.png" rel="icon">
+  
+  
+  <link rel="stylesheet" href="/css/bootstrap.min.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/font-awesome.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/responsive.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/highlight.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/google-fonts.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+
+  <script src="/js/jquery-2.0.3.min.js"></script>
+
+  <!-- analytics -->
+  
+
+
+
+</head>
+
+ <body>  
+  <nav id="main-nav" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+      <button type="button" class="navbar-header navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+		<span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+	  <a class="navbar-brand" href="/">Hexo</a>
+      <div class="collapse navbar-collapse nav-menu">
+		<ul class="nav navbar-nav">
+		  
+		  <li>
+			<a href="/archives" title="All the articles.">
+			  <i class="fa fa-archive"></i>Archives
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/categories" title="All the categories.">
+			  <i class="fa fa-folder"></i>Categories
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/tags" title="All the tags.">
+			  <i class="fa fa-tags"></i>Tags
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/about" title="About me.">
+			  <i class="fa fa-user"></i>About
+			</a>
+		  </li>
+		  
+		</ul>
+      </div>
+    </div> <!-- container -->
+</nav>
+<div class="clearfix"></div>
+
+  <div class="container">
+  	<div class="content">
+    	 
+
+
+	
+		<div class="page-header">		
+			<h1> 【原创】MySQL应用并发优化实践</h1>
+		</div>		
+	
+
+
+
+<div class="row post">
+	<!-- cols -->
+	
+	<div id="top_meta"></div>
+	<div class="col-md-9">
+	
+
+	<!-- content -->
+	<div class="mypage">		
+	  		
+
+	  <p>##测试环境<br>应用结构：<br>JWS+2次库表写入+分库分表<br>目标：TPS=5000<br>测试工具：Jmeter、Sysbench<br>并发线程：16</p>
+<p>##性能目标<br>TPS&gt;=5000</p>
+<p>##现状<br>采用Jmeter在16并发场景下测试2分钟，最终并发在1200-1300之间，距离性能目标比较遥远。</p>
+<p>##优化过程</p>
+<ol>
+<li>首先考虑可能是代码某个地方有问题，暂时没有考虑数据库，因为根据经验不应该这么低。所以，开始反复注释怀疑代码（不包括访问数据库的代码），但实际测试发现数据并无任何改变。</li>
+<li>开始怀疑可能是数据库插入操作比较耗时。注释数据库插入代码后，发现TPS明显提升至14000左右，因此可以断定瓶颈是在数据库插入造作。</li>
+<li>采用Jmeter对MySQL进行基准测试，测试得出当前MySQL的插入TPS&lt;2800，并且观察数据库服务器IO uitil保持在80%以上，因此断定当前MySQL配置已经达到顶峰。</li>
+<li>检查MySQL配置。根据《MySQL配置原理和技巧(ver 0.2).ppt》检查关键配置项，最终发现general-log配置为1，修改为0后，性能提升300左右，达到3100多。</li>
+<li>担心Jmeter测试数据不准，采用Sysbench对MySQL做性能测试，发现TPS依然是3100，最终说明现有MySQL最高性能也就是3100了。</li>
+<li>应用每次调用会做两次数据库插入操作，因此按照3100换算后，可以推算出应用的TPS不会高于1500，和测试情况相符。向DBA询问线上MySQL的写入性能数据为5000，则推算线上应用TPS应低于2500，依然无法达标。</li>
+<li>采用异步队列+批量插入的方式，最终将TPS提升到8000以上。</li>
+</ol>
+<p>##优化方案</p>
+<ol>
+<li>应用内部构建异步队列，用于存储请求消息。所有的请求，提交到异步队列即立刻返回。</li>
+<li>构建调度线程，调度频率为100毫秒；调度线程负责计算每个工作线程需要处理的请求消息数，并提交工作任务到工作线程池，并同步等待其完成。</li>
+<li>工作线程池负责消费异步队列中的消息，其线程数是3。</li>
+<li>每条工作线程根据其要处理的请求消息数，决定批量进行Insert操作的数量，而不是一个请求Insert一次。</li>
+</ol>
+<p>注：MySQL插入性能优化可参见：<a href="http://tech.uc.cn/?p=634" target="_blank" rel="external">http://tech.uc.cn/?p=634</a></p>
+	  
+	</div>
+
+	<div>
+  	<center>
+	<div class="pagination">
+<ul class="pagination">
+	 
+				
+    	<li class="prev"><a href="/2016/01/11/MySQL索引优化名言警句/" class="alignleft prev"><i class="fa fa-arrow-circle-o-left"></i>上一頁</a></li>
+  		
+
+        <li><a href="/archives"><i class="fa fa-archive"></i>Archive</a></li>
+
+		
+		   <li class="next"><a href="/2015/09/19/分析问题和学习知识的方法区别/" class="alignright next">下一頁<i class="fa fa-arrow-circle-o-right"></i></a></li>         
+        
+	
+</ul>
+</div>
+
+    </center>
+	</div>
+	
+	<!-- comment -->
+	
+<section id="comment">
+  <h2 class="title">留言</h2>
+
+  
+</section>
+
+	</div> <!-- col-md-9/col-md-12 -->
+		
+	
+	<div id="side_meta">
+		<div class="col-md-3" id="post_meta"> 
+
+	<!-- date -->
+	
+	<div class="meta-widget">
+	<i class="fa fa-clock-o"></i>
+	2015-09-25 
+	</div>
+	
+
+	<!-- categories -->
+    
+	<div class="meta-widget">
+	<a data-toggle="collapse" data-target="#categorys"><i class="fa fa-folder"></i></a>	
+    <ul id="categorys" class="tag_box list-unstyled collapse in">
+          
+  <li>
+    <li><a href="/categories/并发编程/">并发编程<span>5</span></a></li>
+  </li>
+
+    </ul>
+	</div>
+	
+
+	<!-- tags -->
+	
+	<div class="meta-widget">
+	<a data-toggle="collapse" data-target="#tags"><i class="fa fa-tags"></i></a>		  
+    <ul id="tags" class="tag_box list-unstyled collapse in">	  
+	    
+  <li><a href="/tags/MySQL/">MySQL<span>3</span></a></li> <li><a href="/tags/性能优化/">性能优化<span>1</span></a></li>
+    </ul>
+	</div>
+		
+
+	<!-- toc -->
+	<div class="meta-widget">
+	
+	</div>
+	
+    <hr>
+	
+</div><!-- col-md-3 -->
+
+	</div>
+		
+
+</div><!-- row -->
+
+
+
+	</div>
+  </div>
+  <div class="container-narrow">
+  <footer> <p>
+  &copy; 2016 John Doe
+  
+      with help from <a href="http://hexo.io/" target="_blank">Hexo</a> and <a href="http://getbootstrap.com/" target="_blank">Twitter Bootstrap</a>. Theme by <a href="http://github.com/wzpan/hexo-theme-freemind/">Freemind</a>.    
+</p> </footer>
+</div> <!-- container-narrow -->
+  
+
+
+  
+<a id="gotop" href="#">   
+  <span>▲</span> 
+</a>
+
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/main.js"></script>
+<script src="/js/search.js"></script> 
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+
+</body>
+   </html>

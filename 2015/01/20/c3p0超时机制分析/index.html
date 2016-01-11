@@ -1,0 +1,251 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>【原创】C3P0连接超时分析 | Hexo</title>
+  <meta name="author" content="John Doe">
+  
+  <meta name="description" content="##背景知识c3p0是一个开源的、基于Java JDBC 规范的连接池管理框架。官网地址：[http://www.mchange.com/projects/c3p0/]
+##获取连接的过程
+
+c3p0构造了一个Connection对象池。
+在对象池中有空闲对象时或者没有达到对象池最大数量时，获取Co">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="【原创】C3P0连接超时分析"/>
+  <meta property="og:site_name" content="Hexo"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  
+  
+    <link href="/favicon.png" rel="icon">
+  
+  
+  <link rel="stylesheet" href="/css/bootstrap.min.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/font-awesome.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/responsive.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/highlight.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/google-fonts.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+
+  <script src="/js/jquery-2.0.3.min.js"></script>
+
+  <!-- analytics -->
+  
+
+
+
+</head>
+
+ <body>  
+  <nav id="main-nav" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+      <button type="button" class="navbar-header navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+		<span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+	  <a class="navbar-brand" href="/">Hexo</a>
+      <div class="collapse navbar-collapse nav-menu">
+		<ul class="nav navbar-nav">
+		  
+		  <li>
+			<a href="/archives" title="All the articles.">
+			  <i class="fa fa-archive"></i>Archives
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/categories" title="All the categories.">
+			  <i class="fa fa-folder"></i>Categories
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/tags" title="All the tags.">
+			  <i class="fa fa-tags"></i>Tags
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/about" title="About me.">
+			  <i class="fa fa-user"></i>About
+			</a>
+		  </li>
+		  
+		</ul>
+      </div>
+    </div> <!-- container -->
+</nav>
+<div class="clearfix"></div>
+
+  <div class="container">
+  	<div class="content">
+    	 
+
+
+	
+		<div class="page-header">		
+			<h1> 【原创】C3P0连接超时分析</h1>
+		</div>		
+	
+
+
+
+<div class="row post">
+	<!-- cols -->
+	
+	<div id="top_meta"></div>
+	<div class="col-md-9">
+	
+
+	<!-- content -->
+	<div class="mypage">		
+	  		
+
+	  <p>##背景知识<br>c3p0是一个开源的、基于Java JDBC 规范的连接池管理框架。<br>官网地址：[<a href="http://www.mchange.com/projects/c3p0/" target="_blank" rel="external">http://www.mchange.com/projects/c3p0/</a>]</p>
+<p>##获取连接的过程</p>
+<ol>
+<li>c3p0构造了一个Connection对象池。</li>
+<li>在对象池中有空闲对象时或者没有达到对象池最大数量时，获取Connection都会成功返回。但是要注意，获取到的Connection不一定是可用的(比如服务端MySQL进程挂起、或者服务器掉电等极端情况下)。</li>
+<li>由于空闲的Connetion不一定是可用的，所以c3p0会启用一个检查线程池来检查空闲对象的可用性。检查时，会将该空闲对象加入一个idleCheckResources(Set类型)；检查完成后，再做出删除操作。其实idleCheckResources就是unused（LinkedList）的一个浅层拷贝。空闲连接检查就是依靠执行select 1 sql来验证。</li>
+<li>在我们获取Connection对象后，会检查获取的Connection是否在idleCheckResources中，如果在则等待mytemplate.pool.timeout时间后，递归调用本方法。</li>
+<li>由于第四步的检查机制，导致一个严重的问题。假设对象池中现在有3个连接，而且都是空闲的。并且这个时候三个检查线程都阻塞在select 1了（比如数据库挂起、或者断电、网络延时），需要说明的是这种阻塞是无限期的，即使在执行statement设置了超时时间也是一直阻塞，何况c3p0源码中并没有设置超时时间。那么这个时候，业务线程已经拿到了其中一个对象，那么进行第4步的检查时，就会导致无限递归方法的出现(这种情况就类似自旋锁的死锁问题了)，阻塞住getConnection，最终栈溢出。</li>
+</ol>
+<p>下图描述了这一个过程：</p>
+<p><img src="http://7xj5jf.com1.z0.glb.clouddn.com/C3P0.png" alt=""></p>
+<p>那么为什么对于设置了statement的超时时间没有效果呢？这是因为MySQL的statement超时机制决定的，其机制如下图：</p>
+<p><img src="http://7xj5jf.com1.z0.glb.clouddn.com/query-timeout-mysql-jdbc-statement.png" alt=""></p>
+<p>关键是第8步，同样是要发送sql来取消执行，所以这种时候取消sql也会被阻塞住。根本原因是阻塞在了socket.read()上了，所以发送的取消sql同样会面临阻塞的问题。statement超时一般是为了控制数据库正常时候sql的超时执行的。对于数据库异常时候的超时，应该使用mysql的socket超时。mysql的socket超时只能在启动参数中配置，没有api来提供配置功能。或者还自己来实现异步的检测机制。</p>
+<p>JDBC相关的超时机制详解可以参考：<a href="http://www.cubrid.org/blog/dev-platform/understanding-jdbc-internals-and-timeout-configuration/" target="_blank" rel="external">http://www.cubrid.org/blog/dev-platform/understanding-jdbc-internals-and-timeout-configuration/</a>。</p>
+	  
+	</div>
+
+	<div>
+  	<center>
+	<div class="pagination">
+<ul class="pagination">
+	 
+				
+    	<li class="prev"><a href="/2015/01/20/MySQL服务器性能优化/" class="alignleft prev"><i class="fa fa-arrow-circle-o-left"></i>上一頁</a></li>
+  		
+
+        <li><a href="/archives"><i class="fa fa-archive"></i>Archive</a></li>
+
+		
+		   <li class="next"><a href="/2015/01/20/Java NIO写事件处理技巧/" class="alignright next">下一頁<i class="fa fa-arrow-circle-o-right"></i></a></li>         
+        
+	
+</ul>
+</div>
+
+    </center>
+	</div>
+	
+	<!-- comment -->
+	
+<section id="comment">
+  <h2 class="title">留言</h2>
+
+  
+</section>
+
+	</div> <!-- col-md-9/col-md-12 -->
+		
+	
+	<div id="side_meta">
+		<div class="col-md-3" id="post_meta"> 
+
+	<!-- date -->
+	
+	<div class="meta-widget">
+	<i class="fa fa-clock-o"></i>
+	2015-01-20 
+	</div>
+	
+
+	<!-- categories -->
+    
+	<div class="meta-widget">
+	<a data-toggle="collapse" data-target="#categorys"><i class="fa fa-folder"></i></a>	
+    <ul id="categorys" class="tag_box list-unstyled collapse in">
+          
+  <li>
+    <li><a href="/categories/开源框架/">开源框架<span>1</span></a></li>
+  </li>
+
+    </ul>
+	</div>
+	
+
+	<!-- tags -->
+	
+	<div class="meta-widget">
+	<a data-toggle="collapse" data-target="#tags"><i class="fa fa-tags"></i></a>		  
+    <ul id="tags" class="tag_box list-unstyled collapse in">	  
+	    
+  <li><a href="/tags/c3p0/">c3p0<span>1</span></a></li> <li><a href="/tags/jdbc/">jdbc<span>1</span></a></li>
+    </ul>
+	</div>
+		
+
+	<!-- toc -->
+	<div class="meta-widget">
+	
+	</div>
+	
+    <hr>
+	
+</div><!-- col-md-3 -->
+
+	</div>
+		
+
+</div><!-- row -->
+
+
+
+	</div>
+  </div>
+  <div class="container-narrow">
+  <footer> <p>
+  &copy; 2016 John Doe
+  
+      with help from <a href="http://hexo.io/" target="_blank">Hexo</a> and <a href="http://getbootstrap.com/" target="_blank">Twitter Bootstrap</a>. Theme by <a href="http://github.com/wzpan/hexo-theme-freemind/">Freemind</a>.    
+</p> </footer>
+</div> <!-- container-narrow -->
+  
+
+
+  
+<a id="gotop" href="#">   
+  <span>▲</span> 
+</a>
+
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/main.js"></script>
+<script src="/js/search.js"></script> 
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+
+</body>
+   </html>

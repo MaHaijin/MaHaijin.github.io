@@ -1,0 +1,789 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>第 2 頁 | Hexo</title>
+  <meta name="author" content="John Doe">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+  <meta property="og:site_name" content="Hexo"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  
+  
+    <link href="/favicon.png" rel="icon">
+  
+  
+  <link rel="stylesheet" href="/css/bootstrap.min.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/font-awesome.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/responsive.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/highlight.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/google-fonts.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+
+  <script src="/js/jquery-2.0.3.min.js"></script>
+
+  <!-- analytics -->
+  
+
+
+
+</head>
+
+ <body>  
+  <nav id="main-nav" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+      <button type="button" class="navbar-header navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+		<span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+	  <a class="navbar-brand" href="/">Hexo</a>
+      <div class="collapse navbar-collapse nav-menu">
+		<ul class="nav navbar-nav">
+		  
+		  <li>
+			<a href="/archives" title="All the articles.">
+			  <i class="fa fa-archive"></i>Archives
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/categories" title="All the categories.">
+			  <i class="fa fa-folder"></i>Categories
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/tags" title="All the tags.">
+			  <i class="fa fa-tags"></i>Tags
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/about" title="About me.">
+			  <i class="fa fa-user"></i>About
+			</a>
+		  </li>
+		  
+		</ul>
+      </div>
+    </div> <!-- container -->
+</nav>
+<div class="clearfix"></div>
+
+  <div class="container">
+  	<div class="content">
+    	 <div class="page-header">
+  <h1>Hexo</h1>
+</div>
+
+<div class="row page">
+
+	
+	<div class="col-md-9">
+	
+
+		<div class="slogan">
+      <i class="fa fa-heart"></i>
+      Yet another bootstrap theme.
+</div>    
+		<div id="top_search"></div>
+		<div class="mypage">
+		
+		<!-- title and entry -->
+		
+			
+	
+	<!-- display as entry -->	
+		<h3 class="title">
+			<div class="date"> 2015-04-17 </div>
+			<div class="article-title"><a href="/2015/04/17/基于Netty的“请求-响应”同步通信机制实现/" >【原创】基于Netty的“请求-响应”同步通信机制实现</a></div>						
+		</h3>
+	
+
+
+			<div class="entry">
+  <div class="row">
+	
+	
+		<h2 id="u9700_u6C42_u63CF_u8FF0"><a href="#u9700_u6C42_u63CF_u8FF0" class="headerlink" title="需求描述"></a>需求描述</h2><p>实现基于Netty的“请求-响应”同步通信机制。</p>
+<h2 id="u8BBE_u8BA1_u601D_u8DEF"><a href="#u8BBE_u8BA1_u601D_u8DEF" class="headerlink" title="设计思路"></a>设计思路</h2><p>Netty提供了异步IO和同步IO的统一实现，但是我们的需求其实和IO的同步异步并无关系。我们的关键是要实现请求-响应这种典型的一问一答交互方式。要实现这个需求，需要解决两个问题：</p>
+<ol>
+<li><p>请求和响应的正确匹配。</p>
+<pre><code>当服务端返回响应结果的时候，怎么和客户端的请求正确匹配起来呢？解决方式：通过客户端唯一的RequestId，服务端返回的响应中需要包含该RequestId，这样客户端就可以通过RequestId来正确匹配请求响应。
+</code></pre></li>
+<li><p>请求线程和响应线程的通信。</p>
+<pre><code>因为请求线程会在发出请求后，同步等待飞鸽服务端的返回。因此，就需要解决，Netty在接受到响应之后，怎么通知请求线程结果。
+
+解决方式是利用Java中的CountDownLatch类来实现同步Future。具体过程是：客户端发送请求后将&lt;请求ID，Future&gt;的键值对保存到一个全局的Map中，这时候用Future等待结果，挂住请求线程；当Netty收到服务端的响应后，响应线程根据请求ID寸全局Map中取出Future，然后设置响应结果到Future中。这个时候利用CountDownLatch的通知机制，通知请求线程。请求线程从Future中拿到响应结果，然后做业务处理。
+
+通过对以上两个问题的解决，又引出了一个新的问题：全局Map在并发较大，网络环境较差的情况下，有可能爆满。目前SDK通过一个定时任务，来定时清理该全局Map中超时的请求。
+</code></pre></li>
+</ol>
+<p>同步Future的实现如下：<br> <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SyncFuture</span>&lt;<span class="title">T</span>&gt; <span class="keyword">implements</span> <span class="title">Future</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line">    <span class="comment">// 因为请求和响应是一一对应的，因此初始化CountDownLatch值为1。</span></span><br><span class="line">    <span class="keyword">private</span> CountDownLatch latch = <span class="keyword">new</span> CountDownLatch(<span class="number">1</span>);</span><br><span class="line">    <span class="comment">// 需要响应线程设置的响应结果</span></span><br><span class="line">    <span class="keyword">private</span> T response;</span><br><span class="line">    <span class="comment">// Futrue的请求时间，用于计算Future是否超时</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">long</span> beginTime = System.currentTimeMillis();</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">SyncFuture</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="annotation">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">cancel</span><span class="params">(<span class="keyword">boolean</span> mayInterruptIfRunning)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="annotation">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isCancelled</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="annotation">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isDone</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (response != <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 获取响应结果，直到有结果才返回。</span></span><br><span class="line">    <span class="annotation">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> T <span class="title">get</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        latch.await();</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.response;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 获取响应结果，直到有结果或者超过指定时间就返回。</span></span><br><span class="line">    <span class="annotation">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> T <span class="title">get</span><span class="params">(<span class="keyword">long</span> timeout, TimeUnit unit)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (latch.await(timeout, unit)) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">this</span>.response;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 用于设置响应结果，并且做countDown操作，通知请求线程</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setResponse</span><span class="params">(T response)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.response = response;</span><br><span class="line">        latch.countDown();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">long</span> <span class="title">getBeginTime</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> beginTime;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+
+	
+	</div>
+  <a type="button" href="/2015/04/17/基于Netty的“请求-响应”同步通信机制实现/#more" class="btn btn-default more">閱讀本文</a>
+</div>
+
+		
+			
+	
+	<!-- display as entry -->	
+		<h3 class="title">
+			<div class="date"> 2015-03-20 </div>
+			<div class="article-title"><a href="/2015/03/20/零拷贝概念详解/" >【原创】零拷贝概念详解</a></div>						
+		</h3>
+	
+
+
+			<div class="entry">
+  <div class="row">
+	
+	
+		<h2 id="u6982_u8FF0"><a href="#u6982_u8FF0" class="headerlink" title="概述"></a>概述</h2><p>零拷贝是我们经常听到的一个术语，要解释清楚这个术语，我个人觉得需要说明三个场景。</p>
+<ol>
+<li>Java中的DirectBuffer；</li>
+<li>Java中的transferTo，底层就是Linux的sendFile；</li>
+<li>Linux中的Direct IO；</li>
+</ol>
+<p>本系列分三篇来讲解。</p>
+<h2 id="DirectBuffer_u7684_u7279_u70B9"><a href="#DirectBuffer_u7684_u7279_u70B9" class="headerlink" title="DirectBuffer的特点"></a>DirectBuffer的特点</h2><p>Java中的DirectBuffer的具体用法和API，此处不再赘述。我们主要理解DirectBuffer的原理。</p>
+<ol>
+<li>DirectBuffer是分配在JVM堆外的进程地址空间的，因此，相对于在JVM堆中分配的堆内Buffer，也叫做堆外Buffer。这个地方的堆外，从操作系统的角度讲其实就是JVM进程的地址空间，那么自然也就属于用户空间了，堆也属于JVM进程地址空间。为什么我们要强调用户空间呢？其实是后边的篇幅说明DirectBuffer的“零拷贝”意义。</li>
+<li>DirectBuffer其实是JVM本地代码经过malloc系统调用，在当前JVM进程的地址空间申请的一段内存空间。它的引用依然保存在JVM堆中，只是其存储空间在堆外而已。DirectBuffer的引用一般是直接在JVM堆中的老年代创建的，因此，其回收的时机只有在JVM进行Full GC时。基于这个回收特点，我们需要特别注意，不要频繁的分配大量的DirectBuffer，否则很容易导致内存溢出，而且这个时候的溢出，不是堆溢出，而是本地内存溢出。</li>
+</ol>
+<h2 id="DirectBuffer_u7684_u597D_u5904"><a href="#DirectBuffer_u7684_u597D_u5904" class="headerlink" title="DirectBuffer的好处"></a>DirectBuffer的好处</h2><p>DirectBuffer带来的性能的提升，其根本原因是节省了一次从堆内空间到堆外空间的Buffer拷贝，下图可以说明这个过程。其实省去的就是红线所示的从堆内存到本地内存的拷贝。</p>
+<p><img src="http://7xj5jf.com1.z0.glb.clouddn.com/DirectBuffer_1.png" alt=""></p>
+<p>##sendFile</p>
+<p>待补充……</p>
+<p>##DirectIO<br>待补充……</p>
+
+	
+	</div>
+  <a type="button" href="/2015/03/20/零拷贝概念详解/#more" class="btn btn-default more">閱讀本文</a>
+</div>
+
+		
+			
+	
+	<!-- display as entry -->	
+		<h3 class="title">
+			<div class="date"> 2015-02-27 </div>
+			<div class="article-title"><a href="/2015/02/27/JVM的Heap Memory和Native Memory/" >【原创】JVM的Heap Memory和Native Memory</a></div>						
+		</h3>
+	
+
+
+			<div class="entry">
+  <div class="row">
+	
+	
+		<p>JVM管理的内存可以总体划分为两部分：Heap Memory和Native Memory。前者我们比较熟悉，是供Java应用程序使用的；后者也称为C-Heap，是供JVM自身进程使用的。Heap Memory及其内部各组成的大小可以通过JVM的一系列命令行参数来控制，在此不赘述。Native Memory没有相应的参数来控制大小，其大小依赖于操作系统进程的最大值（对于32位系统就是3~4G，各种系统的实现并不一样），以及生成的Java字节码大小、创建的线程数量、维持java对象的状态信息大小（用于GC）以及一些第三方的包，比如JDBC驱动使用的native内存。</p>
+<p>##Native Memory里存些什么？</p>
+<ol>
+<li>管理java heap的状态数据（用于GC）;</li>
+<li>JNI调用，也就是Native Stack;</li>
+<li>JIT（即使编译器）编译时使用Native Memory，并且JIT的输入（Java字节码）和输出（可执行代码）也都是保存在Native Memory；</li>
+<li>NIO direct buffer。对于IBM JVM和Hotspot，都可以通过-XX:MaxDirectMemorySize来设置nio直接缓冲区的最大值。默认是64M。超过这个时，会按照32M自动增大。</li>
+<li>对于IBM的JVM某些版本实现，类加载器和类信息都是保存在Native Memory中的。</li>
+</ol>
+<p>##DirectBuffer的好处<br>DirectBuffer访问更快，避免了从HeapBuffer还需要从java堆拷贝到本地堆，操作系统直接访问的是DirectBuffer。DirectBuffer对象的数据实际是保存在native heap中，但是引用保存在HeapBuffer中。<br>另外，DirectBuffer的引用是直接分配在堆得Old区的，因此其回收时机是在FullGC时。因此，需要避免频繁的分配DirectBuffer，这样很容易导致Native Memory溢出。</p>
+<p><img src="http://7xj5jf.com1.z0.glb.clouddn.com/DirectBuffer.png" alt=""></p>
+<p>##为什么会内存溢出？<br>简单理解java process memory = java heap + native memory。因此内存溢出时，首先要区分是堆内存溢出还是本地内存溢出。Native Memory本质上就是因为耗尽了进程地址空间。对于HotSpot JVM来书，不断的分配直接内存，会导致如下错误信息：Allocated 1953546760 bytes of native memory before running out</p>
+<p>参考资料：<br><a href="http://www.ibm.com/developerworks/library/j-nativememory-linux/index.html" target="_blank" rel="external">http://www.ibm.com/developerworks/library/j-nativememory-linux/index.html</a><br><a href="http://www.techpaste.com/2012/07/steps-debugdiagnose-memory-memory-leaks-jvm/" target="_blank" rel="external">http://www.techpaste.com/2012/07/steps-debugdiagnose-memory-memory-leaks-jvm/</a><br><a href="https://sourcevirtues.wordpress.com/2013/01/14/java-heap-space-and-native-heap-problems/" target="_blank" rel="external">https://sourcevirtues.wordpress.com/2013/01/14/java-heap-space-and-native-heap-problems/</a><br><a href="http://www.theotherian.com/2013/08/understanding-javas-native-heap-or-c-heap.html" target="_blank" rel="external">http://www.theotherian.com/2013/08/understanding-javas-native-heap-or-c-heap.html</a><br><a href="http://www.ibm.com/developerworks/library/l-kernel-memory-access/" target="_blank" rel="external">http://www.ibm.com/developerworks/library/l-kernel-memory-access/</a><br><a href="http://www.ibm.com/developerworks/library/j-zerocopy/" target="_blank" rel="external">http://www.ibm.com/developerworks/library/j-zerocopy/</a><br><a href="http://en.wikipedia.org/wiki/Direct_memory_access" target="_blank" rel="external">http://en.wikipedia.org/wiki/Direct_memory_access</a></p>
+
+	
+	</div>
+  <a type="button" href="/2015/02/27/JVM的Heap Memory和Native Memory/#more" class="btn btn-default more">閱讀本文</a>
+</div>
+
+		
+			
+	
+	<!-- display as entry -->	
+		<h3 class="title">
+			<div class="date"> 2015-01-20 </div>
+			<div class="article-title"><a href="/2015/01/20/Spymemcached操作队列分析/" >【原创】Spymemcached操作队列分析</a></div>						
+		</h3>
+	
+
+
+			<div class="entry">
+  <div class="row">
+	
+	
+		<p>Spymemcached是一个Memcached（一个高性能内存对象缓存系统）的开源客户端程序。其他MC客户端还有xmemcached、Memcached Client for Java等。我们使用MC客户端程序与MC服务端通信，实现set、get缓存的操作，MC支持的协议类型包括：ASCII 文本协议和二进制协议。</p>
+<p>Spymemcached使用Java NIO来实现，并且是单线程的，也就是说在Spymemcached中只有一个主循环线程来处理各种IO事件（Connection、Read、Write）。对于业务线程来说，调用Spymemcached提供的API即可实现对服务端缓存的增、删、查、改操作，很是便利。处理业务线程操作的具体过程如下：</p>
+<ol>
+<li>Spymemcached将每一个业务线程的操作都封装为一个Operation对象，然后放入内部的inputQueue队列中。</li>
+<li>在放入inputQueue的时候，调用selector.wakup()方法唤醒内部IO线程。</li>
+<li>IO线程被唤醒后，会将inputQueue中所有的Operation拷贝到writeQueue中去，并且会立马对writeQueue中的Operation做IO写操作，而且会注册读事件，如果必要（还有可写的Operation或者写buf中还有数据）还会注册写事件。</li>
+<li>一旦MC服务端有数据返回，就会触发读事件，然后客户端就会返回缓存对象给业务线程。</li>
+</ol>
+<p>下图描述了上述过程：</p>
+<p><img src="http://7xj5jf.com1.z0.glb.clouddn.com/Spymemcached.png" alt=""></p>
+
+	
+	</div>
+  <a type="button" href="/2015/01/20/Spymemcached操作队列分析/#more" class="btn btn-default more">閱讀本文</a>
+</div>
+
+		
+			
+	
+	<!-- display as entry -->	
+		<h3 class="title">
+			<div class="date"> 2015-01-20 </div>
+			<div class="article-title"><a href="/2015/01/20/MySQL服务器性能优化/" >【原创】MySQL服务器性能优化</a></div>						
+		</h3>
+	
+
+
+			<div class="entry">
+  <div class="row">
+	
+	
+		<p>##服务器性能剖析</p>
+<p><strong>第一原则：性能即响应时间。</strong></p>
+<p><strong>第二原则：无法测量就无法有效的优化</strong></p>
+<ol>
+<li>时间花在哪？</li>
+<li>时间为什么花在那？</li>
+</ol>
+<p>完成任务的时间分为：执行时间和等待时间。</p>
+<p>性能剖析分为两步：</p>
+<ol>
+<li>测量任务所花费的时间；</li>
+<li>对结果进行统计和排序，将耗费昂贵的任务排在前边。</li>
+</ol>
+<p>性能剖析分类：</p>
+<ol>
+<li>基于执行时间的分析；<br>研究什么任务的执行时间最长？</li>
+<li>基于等待时间的分析。<br>判断任务在什么地方被阻塞的时间最长？</li>
+</ol>
+<p>优化查询注意两点：</p>
+<ol>
+<li>一些只占总响应时间5%的查询是不值得优化的；<br>阿姆达尔定律：对一个占总响应时间不超过5%的查询进行优化，无论如何努力，收益也不会超过5%。</li>
+<li>如果优化的成本大于收益，就应当停止优化。</li>
+</ol>
+<p>优化查询分两种场景：</p>
+<ol>
+<li>查询次数很多，但是每次查询耗时较少；<br>优先考虑降低查询次数。</li>
+<li>查询次数很少，但是每次查询耗时很多。<br>优化查询</li>
+</ol>
+<p>性能剖析遵循自上而下的原则：应用程序-数据库-操作系统。</p>
+<p>剖析工具：New Relic、xhprof（For PHP）</p>
+<p>MySQL慢查询日志，如果设置long_query_time=0表示捕获所有查询，时间单位可以精确到微秒级别。一般只在收集负载样本时开启慢查询日志，如果一直开启，日志量会很大。<br>MyQL慢查询日志分析工具：pt-query-digest(分析tcpdump)</p>
+<p>在MySQL5.6，profile已经过期了，取而代之的是performance_schema。</p>
+<p>诊断间歇性问题：</p>
+<ol>
+<li>确认是单条查询问题还是服务器问题？<ul>
+<li>使用Show Global Status</li>
+<li>使用shwo processlist</li>
+<li>使用查询日志</li>
+</ul>
+</li>
+<li>捕获诊断数据</li>
+</ol>
+<p>解决他人提出的技术问题的步骤：</p>
+<ol>
+<li>弄清楚问题是什么？一定要能清晰的描述出来。</li>
+<li>为了解决这个问题，已经做过什么操作了。</li>
+</ol>
+<hr>
+<p>##Schema与数据类型优化<br>数据库设计数据：Beginning Databse Design</p>
+<p>数据库设计原则：</p>
+<ol>
+<li>更小的通常更好<br>尽量使用能正确存储数据的最小数据类型。</li>
+<li>简单就好<br>整形比字符型简单。</li>
+<li>尽量避免Null<br>通常最好指定列为非Null。</li>
+</ol>
+<p>Timestamp只使用DateTime一半的存储空间，并且是带时区的，允许的时间范围要小得多。</p>
+<p>Varchar类型是变长字符串，其需要用1或2个字节存储字符串长度，如果字符串长度小于或等于255，则使用1个字节表示长度；否则用2个字节。如：varchar(10)占用11个字节；varchar(1000)占用1002个字节。<br>使用变长是为了节省空间。但是变长字符串在做更新操作时，可能会遇到比原来长度更长的情况，这个时候需要做些额外处理，Innodb是分裂页。</p>
+<p>Varchar适用场景：字符串的最大长度比平均长度要大得多；列的更新很少；使用了像UTF-8这种复杂的字符集，每个字符都是用不同的字节进行存储。</p>
+<p>Char类型是定长字符串，非常适合存储MD5值这种定长的字段。</p>
+<p>Blob类型家族是二进制存储，Text类型家族是字符串存储。</p>
+<p>max_heap_table_size和tmp_table_size控制内存临时表的大小，超过这个大小则转为磁盘临时表。</p>
+<p>DateTime与时区无关，表示范围：1001-9999年，精度为秒；使用8个字节。<br>TimeStatmp和时区相关，表示范围：1970-2038年，精度为秒；使用4个字节存储。<br>Mysql默认会设置第一个TimeStamp为当前时间，更新的时候也会默认更新第一个Timestamp的值为当前时间。</p>
+<p>Schema设计陷阱：</p>
+<ol>
+<li><p>太多的列<br>因为Mysql服务器转换来自存储引擎的行缓冲为行数据格式的CPU开销很大，而转换的代价依赖于列数。</p>
+</li>
+<li><p>关联太多的表<br>Mysql支持一个查询最多关联61张表，但根据经验，如果考虑并发性和查询速度，最好不要超过12张表。</p>
+</li>
+</ol>
+<p>范式化的schema设计的一个缺点是会导致一个查询会有很多关联。<br>如果不需要关联表，则对大部分最坏的情况：表没有使用索引或者是全表扫描，当数据比内存大的时候，全表扫描可能比关联很多表要更快，因为避免了随机IO。</p>
+<p>全表扫扫描一般是顺序IO，依赖于具体的存储引擎。</p>
+<p>提升读性能的手段：缓存表、汇总表、影子表、物化视图、计数器表</p>
+<hr>
+<h2 id="u521B_u5EFA_u9AD8_u6027_u80FD_u7D22_u5F15"><a href="#u521B_u5EFA_u9AD8_u6027_u80FD_u7D22_u5F15" class="headerlink" title="创建高性能索引"></a>创建高性能索引</h2><p>复合索引字段的顺序很重要，因为MySQL只能高效的使用索引最左前缀列。<br>索引类型：</p>
+<ol>
+<li>B-Tree索引<br>实际上大部分存储引擎使用的是B+Tree数据结构，比如InnoDB。</li>
+<li>哈希索引<br>SHA1和MD5是强加密函数，设计目标是最大限度消除冲突。</li>
+<li>R-Tree索引</li>
+<li>全文索引</li>
+</ol>
+<p>索引的有点：</p>
+<ol>
+<li>索引大大减少了服务器需要扫描的数据量；</li>
+<li>索引可以帮助服务器避免排序和临时表；</li>
+<li>索引可以将随机IO变为顺序IO。</li>
+</ol>
+<p>对于B-Tree索引，需要注意索引的顺序。索引列排序是从左到右进行排序。一般将选择性最高的列放于最左边。</p>
+<p>如果数据都是放在内存中，那么聚族索引并没有优势。</p>
+<p>按索引顺序读取数据比顺序的全表扫描慢。</p>
+<p>Limit会限制mysql查询的数据集大小。</p>
+<p>##查询性能优化<br>缓存很重要<br>衡量mysql性能的最简单的三个指标：<br>响应时间<br>扫描的行数<br>返回的行数</p>
+<p>###使用where的三种方式好坏依次为：</p>
+<ol>
+<li>在索引中使用where条件来过滤不匹配的行，这时在存储引擎层来完成的。</li>
+<li>使用索引覆盖扫描（在执行计划的Extra中出现using index）来返回记录，直接从索引中过滤不需要的记录并返回命中的结果。这时在MySQL服务器层来完成的，无须再回表查询记录。</li>
+<li>从数据表中返回数据，然后过滤不满足条件的记录（在执行计划的Extra中出现Using where）。这时在MySQL服务器层来完成的，MySQL需要从数据表读取记录然后过滤。</li>
+</ol>
+<p>MySQL的性能指标参考：<br>一个通用服务器可能也能运行每秒10W的查询。<br>一个千兆网卡能轻松满足每秒2000次查询。<br>MySQL每秒能够扫描内存中上百万行数据。<br>一次删除1W行数据一般来说是一个比较高效的的做法。</p>
+<p>###重构查询的方式</p>
+<ol>
+<li>将复杂查询分为多个简单查询。</li>
+<li>切分为小查询，每个查询只负责一部分数据的查询。</li>
+<li>分解关联查询，将合并动作放在应用程序中去做。<br>好处：<ol>
+<li>让缓存更高效；</li>
+<li>减少锁竞争；</li>
+<li>在应用层做关联，更容易对数据库进行拆分和扩展；</li>
+<li>查询本身效率也会有所提升；</li>
+<li>相当于用哈希关联来替代MySQL的嵌套循环关联。</li>
+</ol>
+</li>
+</ol>
+<p>###MySQL查询原理基础</p>
+<ol>
+<li>MySQL客户端和服务端的通信是半双工的。这意味着，当客户端发送数据给服务端时，服务端只能等待，不能干别的，并且客户端发送给服务端的一般是一个查询SQL的包；同理，服务端发送结果给客户端，一般是由多个包组成，客户端必须等待接收完全部数据，除非主动断开连接。这就是Limit存在的意义所在。</li>
+<li>对于一个MySQL连接，或者说一个线程来说，任何时刻都有一个状态，该状态表明了MySQL当前正在干什么。状态如下：<ol>
+<li>Sleep</li>
+<li>Query</li>
+<li>Locked</li>
+<li>Analyzing and statistics</li>
+<li>Coping to tmp table[on disk]</li>
+<li>Sorting result</li>
+<li>Seneing data</li>
+</ol>
+</li>
+</ol>
+<p>#MySQL分区表</p>
+
+	
+	</div>
+  <a type="button" href="/2015/01/20/MySQL服务器性能优化/#more" class="btn btn-default more">閱讀本文</a>
+</div>
+
+		
+			
+	
+	<!-- display as entry -->	
+		<h3 class="title">
+			<div class="date"> 2015-01-20 </div>
+			<div class="article-title"><a href="/2015/01/20/c3p0超时机制分析/" >【原创】C3P0连接超时分析</a></div>						
+		</h3>
+	
+
+
+			<div class="entry">
+  <div class="row">
+	
+	
+		<p>##背景知识<br>c3p0是一个开源的、基于Java JDBC 规范的连接池管理框架。<br>官网地址：[<a href="http://www.mchange.com/projects/c3p0/" target="_blank" rel="external">http://www.mchange.com/projects/c3p0/</a>]</p>
+<p>##获取连接的过程</p>
+<ol>
+<li>c3p0构造了一个Connection对象池。</li>
+<li>在对象池中有空闲对象时或者没有达到对象池最大数量时，获取Connection都会成功返回。但是要注意，获取到的Connection不一定是可用的(比如服务端MySQL进程挂起、或者服务器掉电等极端情况下)。</li>
+<li>由于空闲的Connetion不一定是可用的，所以c3p0会启用一个检查线程池来检查空闲对象的可用性。检查时，会将该空闲对象加入一个idleCheckResources(Set类型)；检查完成后，再做出删除操作。其实idleCheckResources就是unused（LinkedList）的一个浅层拷贝。空闲连接检查就是依靠执行select 1 sql来验证。</li>
+<li>在我们获取Connection对象后，会检查获取的Connection是否在idleCheckResources中，如果在则等待mytemplate.pool.timeout时间后，递归调用本方法。</li>
+<li>由于第四步的检查机制，导致一个严重的问题。假设对象池中现在有3个连接，而且都是空闲的。并且这个时候三个检查线程都阻塞在select 1了（比如数据库挂起、或者断电、网络延时），需要说明的是这种阻塞是无限期的，即使在执行statement设置了超时时间也是一直阻塞，何况c3p0源码中并没有设置超时时间。那么这个时候，业务线程已经拿到了其中一个对象，那么进行第4步的检查时，就会导致无限递归方法的出现(这种情况就类似自旋锁的死锁问题了)，阻塞住getConnection，最终栈溢出。</li>
+</ol>
+<p>下图描述了这一个过程：</p>
+<p><img src="http://7xj5jf.com1.z0.glb.clouddn.com/C3P0.png" alt=""></p>
+<p>那么为什么对于设置了statement的超时时间没有效果呢？这是因为MySQL的statement超时机制决定的，其机制如下图：</p>
+<p><img src="http://7xj5jf.com1.z0.glb.clouddn.com/query-timeout-mysql-jdbc-statement.png" alt=""></p>
+<p>关键是第8步，同样是要发送sql来取消执行，所以这种时候取消sql也会被阻塞住。根本原因是阻塞在了socket.read()上了，所以发送的取消sql同样会面临阻塞的问题。statement超时一般是为了控制数据库正常时候sql的超时执行的。对于数据库异常时候的超时，应该使用mysql的socket超时。mysql的socket超时只能在启动参数中配置，没有api来提供配置功能。或者还自己来实现异步的检测机制。</p>
+<p>JDBC相关的超时机制详解可以参考：<a href="http://www.cubrid.org/blog/dev-platform/understanding-jdbc-internals-and-timeout-configuration/" target="_blank" rel="external">http://www.cubrid.org/blog/dev-platform/understanding-jdbc-internals-and-timeout-configuration/</a>。</p>
+
+	
+	</div>
+  <a type="button" href="/2015/01/20/c3p0超时机制分析/#more" class="btn btn-default more">閱讀本文</a>
+</div>
+
+		
+			
+	
+	<!-- display as entry -->	
+		<h3 class="title">
+			<div class="date"> 2015-01-20 </div>
+			<div class="article-title"><a href="/2015/01/20/Java NIO写事件处理技巧/" >【原创】Java NIO写事件处理技巧</a></div>						
+		</h3>
+	
+
+
+			<div class="entry">
+  <div class="row">
+	
+	
+		<p>##问题背景<br>OP_WRITE事件是在Socket发送缓冲区中的可用字节数大于或等于其低水位标记SO_SNDLOWAT时发生。正常情况下，都是可写的，因此一般不注册写事件。所以一般代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span> (bb.hasRemaining()) &#123;</span><br><span class="line">     <span class="keyword">int</span> len = socketChannel.write(bb);</span><br><span class="line">     <span class="keyword">if</span> (len &lt; <span class="number">0</span>) &#123;</span><br><span class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> EOFException();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这样在大部分情况都没问题，但是高并发，并且在网络环境很差的情况下，发送缓冲区可能会满，导致无限循环，这样最终会导致CPU利用率100%。下面就看看一些基于NIO的框架，是如何处理这个问题的。</p>
+<p>##Spymemcached的处理方式：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">  <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">handleWrites</span><span class="params">(SelectionKey sk, MemcachedNode qa)</span></span><br><span class="line">    <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">    <span class="comment">// 填充写缓冲区</span></span><br><span class="line">    qa.fillWriteBuffer(shouldOptimize);</span><br><span class="line">    <span class="keyword">boolean</span> canWriteMore = qa.getBytesRemainingToWrite() &gt; <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">while</span> (canWriteMore) &#123;</span><br><span class="line">      <span class="keyword">int</span> wrote = qa.writeSome();</span><br><span class="line">      qa.fillWriteBuffer(shouldOptimize);</span><br><span class="line">      <span class="comment">// 如果wrote等于零，表示没有写出数据，那么不再尝试写，等待下次线程外层循环注册write事件</span></span><br><span class="line">      canWriteMore = wrote &gt; <span class="number">0</span> &amp;&amp; qa.getBytesRemainingToWrite() &gt; <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">int</span> <span class="title">writeSome</span><span class="params">()</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> wrote = channel.write(wbuf);</span><br><span class="line">    <span class="comment">// 写入多少个字节，toWrite就减去对应的数量</span></span><br><span class="line">    toWrite -= wrote;</span><br><span class="line">    <span class="keyword">return</span> wrote;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">int</span> <span class="title">getSelectionOps</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> rv = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">if</span> (getChannel().isConnected()) &#123;</span><br><span class="line">      <span class="keyword">if</span> (hasReadOp()) &#123;</span><br><span class="line">        rv |= SelectionKey.OP_READ;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="comment">// 如果toWrite大于0，说明由于某种异常原因上次写入还未完成；hasWriteOp()用于判断写队列是否还有元素。这两种情况下，需要注册写事件。本文讨论的是toWrite&gt;0的情况。</span></span><br><span class="line">      <span class="keyword">if</span> (toWrite &gt; <span class="number">0</span> || hasWriteOp()) &#123;</span><br><span class="line">        rv |= SelectionKey.OP_WRITE;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      rv = SelectionKey.OP_CONNECT;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> rv;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p><strong>说明：Spymemcached是单线程的，因此就是绝对不能阻塞，所以当发现不可写的时候，不能阻塞住线程，而是立即返回，等待下次主线程循环来注册事件。</strong></p>
+<p>##Netty的处理方式：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">write0</span><span class="params">(AbstractNioChannel&lt;?&gt; channel)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">boolean</span> open = <span class="keyword">true</span>;</span><br><span class="line">    <span class="keyword">boolean</span> addOpWrite = <span class="keyword">false</span>;</span><br><span class="line">    <span class="keyword">boolean</span> removeOpWrite = <span class="keyword">false</span>;</span><br><span class="line">    <span class="keyword">boolean</span> iothread = isIoThread(channel);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">long</span> writtenBytes = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">final</span> SocketSendBufferPool sendBufferPool = <span class="keyword">this</span>.sendBufferPool;</span><br><span class="line">    <span class="keyword">final</span> WritableByteChannel ch = channel.channel;</span><br><span class="line">    <span class="keyword">final</span> Queue&lt;MessageEvent&gt; writeBuffer = channel.writeBufferQueue;</span><br><span class="line">    <span class="keyword">final</span> <span class="keyword">int</span> writeSpinCount = channel.getConfig().getWriteSpinCount();</span><br><span class="line">    List&lt;Throwable&gt; causes = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">synchronized</span> (channel.writeLock) &#123;</span><br><span class="line">        channel.inWriteNowLoop = <span class="keyword">true</span>;</span><br><span class="line">        <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">            MessageEvent evt = channel.currentWriteEvent;</span><br><span class="line">            SendBuffer buf = <span class="keyword">null</span>;</span><br><span class="line">            ChannelFuture future = <span class="keyword">null</span>;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="keyword">if</span> (evt == <span class="keyword">null</span>) &#123;</span><br><span class="line">                    <span class="keyword">if</span> ((channel.currentWriteEvent = evt = writeBuffer.poll()) == <span class="keyword">null</span>) &#123;</span><br><span class="line">                        <span class="comment">// 如果无数据可写，则需要删除可写事件的注册</span></span><br><span class="line">                        removeOpWrite = <span class="keyword">true</span>;</span><br><span class="line">                        channel.writeSuspended = <span class="keyword">false</span>;</span><br><span class="line">                        <span class="keyword">break</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                    future = evt.getFuture();</span><br><span class="line"></span><br><span class="line">                    channel.currentWriteBuffer = buf = sendBufferPool.acquire(evt.getMessage());</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    future = evt.getFuture();</span><br><span class="line">                    buf = channel.currentWriteBuffer;</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">long</span> localWrittenBytes = <span class="number">0</span>;</span><br><span class="line">                <span class="comment">// 通过writeSpinCount来控制尝试写的次数，如果最终还是无法写入，就注册写事件</span></span><br><span class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> i = writeSpinCount; i &gt; <span class="number">0</span>; i --) &#123;</span><br><span class="line">                    <span class="comment">// 写数据</span></span><br><span class="line">                    localWrittenBytes = buf.transferTo(ch);</span><br><span class="line">                    <span class="comment">//  如果写入数据不等于零，表明写入成功，跳出循环</span></span><br><span class="line">                    <span class="keyword">if</span> (localWrittenBytes != <span class="number">0</span>) &#123;</span><br><span class="line">                        writtenBytes += localWrittenBytes;</span><br><span class="line">                        <span class="keyword">break</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="comment">// 如果buf的数据都写完了，则跳出循环</span></span><br><span class="line">                    <span class="keyword">if</span> (buf.finished()) &#123;</span><br><span class="line">                        <span class="keyword">break</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">if</span> (buf.finished()) &#123;</span><br><span class="line">                    <span class="comment">// Successful write - proceed to the next message.</span></span><br><span class="line">                    buf.release();</span><br><span class="line">                    channel.currentWriteEvent = <span class="keyword">null</span>;</span><br><span class="line">                    channel.currentWriteBuffer = <span class="keyword">null</span>;</span><br><span class="line">                    <span class="comment">// Mark the event object for garbage collection.</span></span><br><span class="line">                    <span class="comment">//noinspection UnusedAssignment</span></span><br><span class="line">                    evt = <span class="keyword">null</span>;</span><br><span class="line">                    buf = <span class="keyword">null</span>;</span><br><span class="line">                    future.setSuccess();</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    <span class="comment">// Not written fully - perhaps the kernel buffer is full.</span></span><br><span class="line">                    addOpWrite = <span class="keyword">true</span>;</span><br><span class="line">                    channel.writeSuspended = <span class="keyword">true</span>;</span><br><span class="line"></span><br><span class="line">                    <span class="keyword">if</span> (writtenBytes &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                        <span class="comment">// Notify progress listeners if necessary.</span></span><br><span class="line">                        future.setProgress(</span><br><span class="line">                                localWrittenBytes,</span><br><span class="line">                                buf.writtenBytes(), buf.totalBytes());</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        channel.inWriteNowLoop = <span class="keyword">false</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (open) &#123;</span><br><span class="line">            <span class="keyword">if</span> (addOpWrite) &#123;</span><br><span class="line">                <span class="comment">// 注册写事件</span></span><br><span class="line">                setOpWrite(channel);</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> (removeOpWrite) &#123;</span><br><span class="line">               <span class="comment">// 删除写事件</span></span><br><span class="line">                clearOpWrite(channel);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p><strong>说明：Netty是多线程的，因此其可以通过阻塞线程做一定的等待，等待通道可写。Netty等待是通过spinCount等待指定的循环次数。</strong></p>
+<p>##Grizzly（诞生子Glass Fish项目）的处理方式：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">long</span> <span class="title">flushChannel</span><span class="params">(SocketChannel socketChannel, ByteBuffer bb, <span class="keyword">long</span> writeTimeout)</span></span><br><span class="line">        <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">    SelectionKey key = <span class="keyword">null</span>;</span><br><span class="line">    Selector writeSelector = <span class="keyword">null</span>;</span><br><span class="line">    <span class="keyword">int</span> attempts = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">int</span> bytesProduced = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">while</span> (bb.hasRemaining()) &#123;</span><br><span class="line">            <span class="keyword">int</span> len = socketChannel.write(bb);</span><br><span class="line">            <span class="comment">// 类似Netty的spinCount</span></span><br><span class="line">            attempts++;</span><br><span class="line">            <span class="keyword">if</span> (len &lt; <span class="number">0</span>) &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> EOFException();</span><br><span class="line">            &#125;</span><br><span class="line">            bytesProduced += len;</span><br><span class="line">            <span class="keyword">if</span> (len == <span class="number">0</span>) &#123;</span><br><span class="line">                <span class="keyword">if</span> (writeSelector == <span class="keyword">null</span>) &#123;</span><br><span class="line">                   <span class="comment">// 获取一个新的selector</span></span><br><span class="line">                    writeSelector = SelectorFactory.getSelector();</span><br><span class="line">                    <span class="keyword">if</span> (writeSelector == <span class="keyword">null</span>) &#123;</span><br><span class="line">                        <span class="comment">// Continue using the main one</span></span><br><span class="line">                        <span class="keyword">continue</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="comment">// 在新selector上注册写事件，而不是在主selector上注册</span></span><br><span class="line">                key = socketChannel.register(writeSelector, key.OP_WRITE);</span><br><span class="line">                <span class="comment">// 利用writeSelector.select()来阻塞当前线程，等待可写事件发生，总共等待可写事件的时长是3*writeTimeout</span></span><br><span class="line">                <span class="keyword">if</span> (writeSelector.select(writeTimeout) == <span class="number">0</span>) &#123;</span><br><span class="line">                    <span class="keyword">if</span> (attempts &gt; <span class="number">2</span>)</span><br><span class="line">                        <span class="keyword">throw</span> <span class="keyword">new</span> IOException(<span class="string">"Client disconnected"</span>);</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    attempts--;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                attempts = <span class="number">0</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; </span><br><span class="line">    <span class="keyword">return</span> bytesProduced;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p><strong>说明：Grizzly是多线程的，因此其可以做合适的阻塞等待。其没有再主selector上注册写事件，而是在重新构造的selector上注册写事件，并且通过select()来阻塞一定的时间来等待可写。</strong><br>为什么要这么做呢？Grizzly的作者对此的回应如下：</p>
+<ol>
+<li>使用临时的Selector的目的是减少线程间的切换。当前的Selector一般用来处理OP_ACCEPT，和OP_READ的操作。使用临时的Selector可减轻主Selector的负担;而在注册的时候则需要进行线程切换，会引起不必要的系统调用。这种方式避免了线程之间的频繁切换，有利于系统的性能提高。</li>
+<li>虽然writeSelector.select(writeTimeout)做了阻塞操作，但是这种情况只是少数极端的环境下才会发生。&gt; 大多数的客户端是不会频繁出现这种现象的，因此在同一时刻被阻塞的线程不会很多。</li>
+<li>利用这个阻塞操作来判断异常中断的客户连接。</li>
+<li>经过压力实验证明这种实现的性能是非常好的。</li>
+</ol>
+
+	
+	</div>
+  <a type="button" href="/2015/01/20/Java NIO写事件处理技巧/#more" class="btn btn-default more">閱讀本文</a>
+</div>
+
+		
+			
+	
+	<!-- display as entry -->	
+		<h3 class="title">
+			<div class="date"> 2015-01-11 </div>
+			<div class="article-title"><a href="/2015/01/11/Linux学习系列-信号/" >【原创】Linux学习系列-信号</a></div>						
+		</h3>
+	
+
+
+			<div class="entry">
+  <div class="row">
+	
+	
+		<p>#信号的定义和分类<br>信号是软件中断，提供了典型的异步机制。每个信号有一个编号，信号分为两类：非实时信号和实时信号。0-31编号属于非实时信号；31-63编号属于实时信号。为什么会分为这两类信号呢？这个主要是因为历史原因，首先实现的是非实时信号，非实时信号也成为不可靠信号，是因为其实现机制导致这类信号可能会丢失；而实时信号，由于存在排队机制，所以不会丢失。关于这点会在信号的处理过程图示中详细阐述。</p>
+<p>#信号的来源<br>信号事件的发生有两个来源：硬件来源(比如我们按下了键盘或者其它硬件故障)；软件来源，最常用发送信号的系统函数是kill, raise, alarm和setitimer以及sigqueue函数，软件来源还包括一些非法运算等操作。</p>
+<p>#信号的处理时机<br>每个信号都可以被关联1个信号处理函数，如果没有关联，其处理动作是系统默认的，大部分都是动作都是忽略，具体每个信号的默认处理动作可以谷歌查询。在目标进程执行过程中，会检测是否有信号等待处理（每次从系统空间返回到用户空间时都做这样的检查），如果有，则调用信号处理函数。</p>
+<p>#信号的状态<br>实际执行信号的处理动作称为信号递达，信号从产生到递达之间的状态成为未决。进程既可以忽略信号，也可以阻塞信号。阻塞的意思是信号不会被递达，而忽略是信号递达之后的一个可选动作。信号在内核中的表示包括两个标记位：阻塞标记位和未决标记位以及信号处理函数的指针。</p>
+<p>#信号的处理过程</p>
+<ol>
+<li>如果存在未决信号等待处理且该信号没有被进程阻塞，则在运行相应的信号处理函数前，进程会把信号在未决信号链中占有的结构卸掉。是否将信号从进程未决信号集中删除对于实时与非实时信号是不同的。</li>
+<li>对于非实时信号来说，由于在未决信号信息链中最多只占用一个sigqueue结构，因此该结构被释放后，应该把信号在进程未决信号集中删除（信号注销完毕）。</li>
+<li>对于实时信号来说，可能在未决信号信息链中占用多个sigqueue结构，因此应该针对占用sigqueue结构的数目区别对待：如果只占用一个sigqueue结构（进程只收到该信号一次），则应该把信号在进程的未决信号集中删除（信号注销完毕）。否则，不应该在进程的未决信号集中删除该信号（信号注销完毕）。</li>
+</ol>
+<p>下图就是我理解的信号处理过程：</p>
+<p><img src="http://7xj5jf.com1.z0.glb.clouddn.com/信号处理机制-1.png" alt=""></p>
+
+	
+	</div>
+  <a type="button" href="/2015/01/11/Linux学习系列-信号/#more" class="btn btn-default more">閱讀本文</a>
+</div>
+
+		
+			
+	
+	<!-- display as entry -->	
+		<h3 class="title">
+			<div class="date"> 2015-01-11 </div>
+			<div class="article-title"><a href="/2015/01/11/Linux学习系列-进程间通信/" >【原创】Linux学习系列-进程间通信</a></div>						
+		</h3>
+	
+
+
+			<div class="entry">
+  <div class="row">
+	
+	
+		<p>#管道</p>
+<blockquote>
+<pre><code>管道
+</code></pre><p><img src="/~/管道.png" alt=""></p>
+</blockquote>
+<p>#FIFO(命名管道)</p>
+<p>#消息队里</p>
+<p>#信号量</p>
+<p>#共享内存区</p>
+<p>#套接字</p>
+
+	
+	</div>
+  <a type="button" href="/2015/01/11/Linux学习系列-进程间通信/#more" class="btn btn-default more">閱讀本文</a>
+</div>
+
+		
+			
+	
+	<!-- display as entry -->	
+		<h3 class="title">
+			<div class="date"> 2015-01-08 </div>
+			<div class="article-title"><a href="/2015/01/08/Linux学习系列-轮询函数/" >【原创】Linux学习系列-轮询函数</a></div>						
+		</h3>
+	
+
+
+			<div class="entry">
+  <div class="row">
+	
+	
+		<p>理解这三个轮询函数差异的关键在于理解其轮询的文件描述符（socket也是文件）的数据结构。</p>
+<p>##select轮询函数</p>
+<p>函数定义：</p>
+ <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">select</span><span class="params">(<span class="keyword">int</span> nfds, fd_set *readfds, fd_set *writefds, fd_set *exeptfds, <span class="keyword">struct</span> timeval *timeout)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// fd_set操作宏</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">FD_SET</span><span class="params">(<span class="keyword">int</span> fd, fd_set *fdset)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">FD_CLR</span><span class="params">(<span class="keyword">int</span> fd, fd_set *fdset)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">FD_ISSET</span><span class="params">(<span class="keyword">int</span> fd, fd_set *fdset)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">FD_ZERO</span><span class="params">(fd_set *fdset)</span></span>;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>nfds参数指定被监听的文件描述符总数；</li>
+<li>readfds、writefds、exeptfds参数分别指向可读、可写和异常事件的accept到的对应的文件描述符集合；fd_set中用一个整型数组的每一个元素的每一位（bit）来表示每一个文件描述符是否有相应的事件发生（0表示有；1表示没有），那么理论上fd_set就可以表示【数组长度*32】个文件描述符，而数组长度由FD_SETSIZE 来设置，一般是1024。在select之前，每次先调用FD_SET()设置accept到的文件描述符标记位为1，表示需要监听这个文件描述符需要监听可读、可写或者异常事件；当有可读、可写和异常事件发生时，在select调用过程中，内核会修改相应的这三个文件描述符集合中的没有事件发生的文件描述符标记位为0；在select之后，应用程序就可以轮询accept到的所有文件描述符，并通过FD_ISSET来判断该文件描述符是否有事件发生（fd_set中对应的文件描述符标记位是1表示有事件发生）。</li>
+<li>timeout就是轮询时间片，表示多久轮询一次。</li>
+</ul>
+<p>##这种函数设计实现，有三个缺陷：##</p>
+<ol>
+<li>监听的事件类型有限，只有3种；</li>
+<li>readfds、writefds和exeptfds有两重角色，第一层是当做要监听的文件描述符集合来传给内核监听；第二层是当做发生事件的文件描述符结果集合。因此每次轮询处理完事件，需要重新设置需要监听的文件描述符；</li>
+<li>事件和文件描述符没有绑定，因此要处理事件需要轮询所有的已accept到的文件描述符。</li>
+</ol>
+<p>##poll轮询函数<br>函数定义：<br> <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">poll</span><span class="params">(<span class="keyword">struct</span> pollfd *fds, nfds_t nfds, <span class="keyword">int</span> timeout)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> pollfd</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">int</span> fd;  <span class="comment">//文件描述符</span></span><br><span class="line">    <span class="keyword">short</span> events;  <span class="comment">//注册的事件</span></span><br><span class="line">    <span class="keyword">short</span> revents  <span class="comment">//实际发生的事件，由内核填充</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li>fds是需要监听的文件描述符集合，它是一个pollfd结构体的数组。</li>
+<li>nfds是监听的文件描述符的数量，也就是fds数组的长度。</li>
+</ul>
+<p>说明：与select相比这种函数设计清晰简洁，将文件描述符和事件通过pollfd结构体来进行了绑定，并且区分了注册的时间和实际发生的事件。但是其和select一样，最终轮询的结果都是所有已经注册的文件描述符的集合。</p>
+<p>##epoll轮询函数<br>函数定义:<br> <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 创建内核事件表，返回的就是事件表的文件描述符 */</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">epoll_create</span><span class="params">(<span class="keyword">int</span> size)</span></span>; </span><br><span class="line"><span class="comment">/* 往内核事件表注册、修改、删除指定fd上的事件 */</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">epoll_ctl</span><span class="params">(<span class="keyword">int</span> epfd, <span class="keyword">int</span> op, <span class="keyword">int</span> fd, <span class="keyword">struct</span> epoll_event *event)</span></span>; </span><br><span class="line"><span class="comment">/* 轮询检测事件 */</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">epoll_wait</span><span class="params">(<span class="keyword">int</span> epfd, <span class="keyword">struct</span> epoll_event *events, <span class="keyword">int</span> maxevents, <span class="keyword">int</span> timeout)</span></span>;</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li>epoll和select、poll有明显不同，其提供了一套函数。它会在内核开辟一个事件表用于存储注册的事件。</li>
+<li>epoll_ctl中的epfd就是epoll_create的返回值，表示内核事件表的文件描述符；op就是操作，包括注册、删除、修改；fd表示要操作的文件描述符；event表示要注册到fd上的事件，需要特别之处epoll_event结构实现了事件和文件描述符的绑定。</li>
+<li>epoll_wait是轮询函数，如果检测到事件，就将所有就绪的事件从内核事件表中的拷贝到第二个参数指向的数组events中。这和select、poll有明显区别，这提高了应用程序轮询就绪事件的效率。</li>
+<li>epoll还有一个特殊的地方在于，其存在两种模式：LT（电平触发）和ET（边沿触发）。LT是默认工作模式，而当往内核事件表注册一个文件描述符的EPOLLET事件时，epoll将以ET模式来操作文件描述符。ET是一种高效模式。LT模式下，当epoll_wait检测到事件时，应用程序可以不用立即处理，下次epoll_wait时还会再次通告应用程序；ET模式下，应用程序必须立即处理事件，因此避免了epoll_wait重复触发事件的次数，因此较高效。</li>
+</ul>
+<p>##统一事件源<br>我们这里讲的统一事件源中的事件源是指IO事件和信号。信号原理可以参见《Linux学习系列-信号》。通常我们通过轮询函数来处理IO事件，既然要统一，那么自然也要使用轮询函数来处理信号。典型的处理方案是：信号发生时，信号处理函数一般通过管道来通知程序主循环信号值，那么主循环中的轮询函数就可以通过轮询函数来监听管道上的IO事件即可。这样就实现了IO事件和信号的统一处理。</p>
+
+	
+	</div>
+  <a type="button" href="/2015/01/08/Linux学习系列-轮询函数/#more" class="btn btn-default more">閱讀本文</a>
+</div>
+
+		
+
+		</div>
+
+		<!-- pagination -->
+		<div>
+  		<center>
+		<div class="pagination">
+<ul class="pagination">
+	 
+		
+    	<li class="prev"><a href="/" class="alignleft prev"><i class="fa fa-arrow-circle-o-left"></i> 上一頁</a></li>
+  		
+
+        <li><a href="/"><i class="fa fa-home"></i>Home</a></li>
+
+		
+		   <li class="next"> <a href="/page/3/" class="alignright next">下一頁<i class="fa fa-arrow-circle-o-right"></i></a> </li>          
+        
+	
+</ul>
+</div>
+
+  		</center>
+		</div>
+
+		
+		
+	</div> <!-- col-md-9 -->
+
+	
+		<div class="col-md-3">
+	<div id="sidebar">
+	
+			
+  <div id="site_search">
+   <div class="form-group">
+    <input type="text" id="local-search-input" name="q" results="0" placeholder="搜尋" class="st-search-input st-default-search-input form-control"/>
+   </div>  
+  <div id="local-search-result"></div>
+  </div>
+
+
+		
+			
+	<div class="widget">
+		<h4>分類</h4>
+		<ul class="tag_box inline list-unstyled">
+		
+			<li><a href="/categories/JVM/">JVM<span>1</span></a></li>
+		
+			<li><a href="/categories/Linux/">Linux<span>4</span></a></li>
+		
+			<li><a href="/categories/协议/">协议<span>1</span></a></li>
+		
+			<li><a href="/categories/基准测试/">基准测试<span>1</span></a></li>
+		
+			<li><a href="/categories/并发编程/">并发编程<span>5</span></a></li>
+		
+			<li><a href="/categories/开源框架/">开源框架<span>1</span></a></li>
+		
+			<li><a href="/categories/所思所想/">所思所想<span>1</span></a></li>
+		
+			<li><a href="/categories/数据库/">数据库<span>1</span></a></li>
+		
+			<li><a href="/categories/架构/">架构<span>1</span></a></li>
+		
+			<li><a href="/categories/缓存实现/">缓存实现<span>1</span></a></li>
+		
+			<li><a href="/categories/项目管理/">项目管理<span>1</span></a></li>
+		
+		</ul>
+	</div>
+
+		
+			
+	<div class="widget">
+		<h4>標籤雲</h4>
+		<ul class="tag_box inline list-unstyled">		
+		
+			<li><a href="/tags/sysbench/">sysbench<span>1</span></a></li>
+		
+			<li><a href="/tags/IO模型/">IO模型<span>1</span></a></li>
+		
+			<li><a href="/tags/统一事件源/">统一事件源<span>1</span></a></li>
+		
+			<li><a href="/tags/memcached/">memcached<span>2</span></a></li>
+		
+			<li><a href="/tags/性能优化/">性能优化<span>1</span></a></li>
+		
+			<li><a href="/tags/文件系统/">文件系统<span>1</span></a></li>
+		
+			<li><a href="/tags/架构/">架构<span>1</span></a></li>
+		
+			<li><a href="/tags/SendFile/">SendFile<span>1</span></a></li>
+		
+			<li><a href="/tags/MySQL/">MySQL<span>3</span></a></li>
+		
+			<li><a href="/tags/TCP/">TCP<span>1</span></a></li>
+		
+			<li><a href="/tags/epoll/">epoll<span>1</span></a></li>
+		
+			<li><a href="/tags/DirectIO/">DirectIO<span>1</span></a></li>
+		
+			<li><a href="/tags/NIO/">NIO<span>1</span></a></li>
+		
+			<li><a href="/tags/jdbc/">jdbc<span>1</span></a></li>
+		
+			<li><a href="/tags/Netty/">Netty<span>4</span></a></li>
+		
+			<li><a href="/tags/信号/">信号<span>1</span></a></li>
+		
+			<li><a href="/tags/c3p0/">c3p0<span>1</span></a></li>
+		
+			<li><a href="/tags/Java-Heap/">Java Heap<span>1</span></a></li>
+		
+			<li><a href="/tags/方法论/">方法论<span>1</span></a></li>
+		
+			<li><a href="/tags/Grizzly/">Grizzly<span>1</span></a></li>
+		
+		
+		   <li><a href="/tags">...<span>25</span></a></li>
+		 
+		</ul>
+	</div>
+
+
+		
+			
+<div class="widget">
+  <h4>最新文章</h4>
+  <ul class="entry list-unstyled">
+    
+      <li>
+        <a href="/2016/01/11/主备倒换方案选型/" ><i class="fa fa-file-o"></i>【原创】消息中间件主备方案选型实践...</a>
+      </li>
+    
+      <li>
+        <a href="/2016/01/11/软件设计思想小结/" ><i class="fa fa-file-o"></i>...</a>
+      </li>
+    
+      <li>
+        <a href="/2016/01/11/软件架构设计笔记/" ><i class="fa fa-file-o"></i>...</a>
+      </li>
+    
+      <li>
+        <a href="/2016/01/11/MySQL索引优化名言警句/" ><i class="fa fa-file-o"></i>...</a>
+      </li>
+    
+      <li>
+        <a href="/2015/09/25/MySQL应用并发优化实践/" ><i class="fa fa-file-o"></i>【原创】MySQL应用并发优化实践...</a>
+      </li>
+    
+  </ul>
+</div>
+
+		
+			
+<div class="widget">
+	<h4>鏈接</h4>
+	<ul class="blogroll list-unstyled">
+	
+		<li><i class="fa fa-github"></i><a href="https://github.com/wzpan/freemind/" title="Freemind's Github repository." target="_blank"]);">Freemind</a></li>
+	
+		<li><i class="fa fa-github"></i><a href="http://www.github.com/wzpan" title="My Github account." target="_blank"]);">My Github</a></li>
+	
+		<li><i class="fa fa-linkedin"></i><a href="http://www.linkedin.com/in/hahack" title="My Linkin account." target="_blank"]);">My LinkedIn</a></li>
+	
+	</ul>
+</div>
+
+
+		
+	</div> <!-- sidebar -->
+</div> <!-- col-md-3 -->
+
+	
+	
+</div> <!-- row-fluid -->
+	</div>
+  </div>
+  <div class="container-narrow">
+  <footer> <p>
+  &copy; 2016 John Doe
+  
+      with help from <a href="http://hexo.io/" target="_blank">Hexo</a> and <a href="http://getbootstrap.com/" target="_blank">Twitter Bootstrap</a>. Theme by <a href="http://github.com/wzpan/hexo-theme-freemind/">Freemind</a>.    
+</p> </footer>
+</div> <!-- container-narrow -->
+  
+
+
+  
+<a id="gotop" href="#">   
+  <span>▲</span> 
+</a>
+
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/main.js"></script>
+<script src="/js/search.js"></script> 
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+
+</body>
+   </html>

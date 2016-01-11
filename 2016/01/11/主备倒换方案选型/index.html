@@ -1,0 +1,285 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>【原创】消息中间件主备方案选型实践 | Hexo</title>
+  <meta name="author" content="John Doe">
+  
+  <meta name="description" content="##背景介绍
+
+该消息中间件由三个子系统组成：客户端SDK、Server和控制管理中心（Admin）。我们所说的主备主要是针对Server，而Server的节点是局部有状态的，具体而言就是发布无状态，但是拉取有状态。因此，对于发布而言，由于分布式部署所以本身具备高可用性；但是对于拉取，就存在单点的可">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="【原创】消息中间件主备方案选型实践"/>
+  <meta property="og:site_name" content="Hexo"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  
+  
+    <link href="/favicon.png" rel="icon">
+  
+  
+  <link rel="stylesheet" href="/css/bootstrap.min.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/font-awesome.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/responsive.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/highlight.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/google-fonts.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+
+  <script src="/js/jquery-2.0.3.min.js"></script>
+
+  <!-- analytics -->
+  
+
+
+
+</head>
+
+ <body>  
+  <nav id="main-nav" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+      <button type="button" class="navbar-header navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+		<span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+	  <a class="navbar-brand" href="/">Hexo</a>
+      <div class="collapse navbar-collapse nav-menu">
+		<ul class="nav navbar-nav">
+		  
+		  <li>
+			<a href="/archives" title="All the articles.">
+			  <i class="fa fa-archive"></i>Archives
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/categories" title="All the categories.">
+			  <i class="fa fa-folder"></i>Categories
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/tags" title="All the tags.">
+			  <i class="fa fa-tags"></i>Tags
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/about" title="About me.">
+			  <i class="fa fa-user"></i>About
+			</a>
+		  </li>
+		  
+		</ul>
+      </div>
+    </div> <!-- container -->
+</nav>
+<div class="clearfix"></div>
+
+  <div class="container">
+  	<div class="content">
+    	 
+
+
+	
+		<div class="page-header">		
+			<h1> 【原创】消息中间件主备方案选型实践</h1>
+		</div>		
+	
+
+
+
+<div class="row post">
+	<!-- cols -->
+	
+	<div id="top_meta"></div>
+	<div class="col-md-9">
+	
+
+	<!-- content -->
+	<div class="mypage">		
+	  		
+
+	  <p>##背景介绍</p>
+<blockquote>
+<p>该消息中间件由三个子系统组成：客户端SDK、Server和控制管理中心（Admin）。我们所说的主备主要是针对Server，而Server的节点是局部有状态的，具体而言就是发布无状态，但是拉取有状态。因此，对于发布而言，由于分布式部署所以本身具备高可用性；但是对于拉取，就存在单点的可用性问题。</p>
+</blockquote>
+<p>##主备切换的关键问题</p>
+<blockquote>
+<p>实现主备切换，需要解决两个核心问题：</p>
+<ol>
+<li>解决主备之间状态检测、通信和决策问题。<br>通过心跳检测来得知互相之间的状态，一旦得知对方状态异常需要接管对方的资源继续提供服务。</li>
+<li>解决资源转移的问题。<br>通过资源共享机制或者资源同步冗余方式来解决资源转移的问题。</li>
+</ol>
+<p>任何一套主备切换方案都需要解决这两个基本问题。</p>
+</blockquote>
+<p>##主备切换思路</p>
+<blockquote>
+<ol>
+<li>故障检测</li>
+<li>状态和决策</li>
+<li>资源切换</li>
+</ol>
+</blockquote>
+<p>##方案比较</p>
+<ol>
+<li><strong>Zookeeper</strong><blockquote>
+<p>如果使用Zookeeper，每组主备Server需要部署Zookeeper，作为Zookeeper Server；SDK作为Zookeeper Client，建立和主备Server的连接，并且监控Zookeeper Server的事件。如果发生不可用，则可以通过监听到的事件，来触发主备切换。那么其实，我们使用Zookeeper只解决了第一个问题。至于第二个问题，如果是Single模式，资源转移可以通过DB中间件来共享资源解决；如果是Master-Slave模式，则需要Server自身的开发来解决。</p>
+</blockquote>
+</li>
+<li><strong>负载均衡软件（LVS、HAProxy、Nginx）+ 高可用软件（Keepalived、Heartbeat）</strong><blockquote>
+<p>这种方案是用于负载均衡Server的高可用，Keepalived和Heartbeat也只是解决了第一个问题；第二个问题是负载均衡软件来解决。</p>
+</blockquote>
+</li>
+<li><p><strong>自研</strong><br><strong>自研方案一</strong></p>
+<blockquote>
+<ol>
+<li>Admin作为观察者，建立和每一个主备server的的连接，并通过心跳检测监控连接状态。Admin管理每组主备的关系和其激活状态。需要考虑Admin本身的高可用性。</li>
+<li>Server的备机启动项区别于主机，并且只提供拉取服务，其他服务拒绝。另外，备机在恢复时，需要先停止服务，然后同步消费状态；Server的主机在恢复时，首先要从Admin拉取消费状态信息，并更新到DB。</li>
+<li>SDK定时从飞鸽Admin拉取飞鸽Server的信息，如果发现Slave被激活，则建立同Slave的连接，剔除Master连接；如果发现Master被激活，则建立同Master的连接，待连接建立成功后，再剔除Slave连接。</li>
+</ol>
+</blockquote>
+<p>主备切换序列图：<br><img src="http://7xj5jf.com1.z0.glb.clouddn.com/主备切换序列图.png" alt=""></p>
+<p>主备切换序列图：<br><img src="http://7xj5jf.com1.z0.glb.clouddn.com/主备恢复序列图.png" alt=""></p>
+<p><strong>自研方案二</strong></p>
+<blockquote>
+<ol>
+<li>在SDK和Server之间加一个飞鸽Proxy，其负责主备切换，并且负责路由，这样可以轻量化SDK。因为目前server的连接是带了鉴权状态的，因此就需要将鉴权功能上移到proxy。或者考虑是否可以去除连接的状态？连接是否有状态会影响proxy本身的高可用方案，如果连接无状态，直接采用F5即可；如果有状态，则proxy本身的高可用方案又是个难题了。</li>
+<li>Proxy保持这和Master和Slave的长连接，并且做心跳检测，检测达到切换条件，则触发切换动作。</li>
+<li>Proxy方案对现有飞鸽方案的冲击比较大，改动面比较多。</li>
+</ol>
+</blockquote>
+</li>
+</ol>
+	  
+	</div>
+
+	<div>
+  	<center>
+	<div class="pagination">
+<ul class="pagination">
+	 
+		
+          <li class="prev disabled"><a><i class="fa fa-arrow-circle-o-left"></i>上一頁</a></li>
+        
+
+        <li><a href="/archives"><i class="fa fa-archive"></i>Archive</a></li>
+
+		
+		   <li class="next"><a href="/2016/01/11/软件设计思想小结/" class="alignright next">下一頁<i class="fa fa-arrow-circle-o-right"></i></a></li>         
+        
+	
+</ul>
+</div>
+
+    </center>
+	</div>
+	
+	<!-- comment -->
+	
+<section id="comment">
+  <h2 class="title">留言</h2>
+
+  
+</section>
+
+	</div> <!-- col-md-9/col-md-12 -->
+		
+	
+	<div id="side_meta">
+		<div class="col-md-3" id="post_meta"> 
+
+	<!-- date -->
+	
+	<div class="meta-widget">
+	<i class="fa fa-clock-o"></i>
+	2016-01-11 
+	</div>
+	
+
+	<!-- categories -->
+    
+	<div class="meta-widget">
+	<a data-toggle="collapse" data-target="#categorys"><i class="fa fa-folder"></i></a>	
+    <ul id="categorys" class="tag_box list-unstyled collapse in">
+          
+  <li>
+    <li><a href="/categories/架构/">架构<span>1</span></a></li>
+  </li>
+
+    </ul>
+	</div>
+	
+
+	<!-- tags -->
+	
+	<div class="meta-widget">
+	<a data-toggle="collapse" data-target="#tags"><i class="fa fa-tags"></i></a>		  
+    <ul id="tags" class="tag_box list-unstyled collapse in">	  
+	    
+  <li><a href="/tags/架构/">架构<span>1</span></a></li>
+    </ul>
+	</div>
+		
+
+	<!-- toc -->
+	<div class="meta-widget">
+	
+	</div>
+	
+    <hr>
+	
+</div><!-- col-md-3 -->
+
+	</div>
+		
+
+</div><!-- row -->
+
+
+
+	</div>
+  </div>
+  <div class="container-narrow">
+  <footer> <p>
+  &copy; 2016 John Doe
+  
+      with help from <a href="http://hexo.io/" target="_blank">Hexo</a> and <a href="http://getbootstrap.com/" target="_blank">Twitter Bootstrap</a>. Theme by <a href="http://github.com/wzpan/hexo-theme-freemind/">Freemind</a>.    
+</p> </footer>
+</div> <!-- container-narrow -->
+  
+
+
+  
+<a id="gotop" href="#">   
+  <span>▲</span> 
+</a>
+
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/main.js"></script>
+<script src="/js/search.js"></script> 
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+
+</body>
+   </html>

@@ -4,34 +4,22 @@
 <head>
   <meta charset="UTF-8">
   
-    <title>【原创】Linux学习系列-IO模型 | Ma Haijin</title>
+    <title>Ma Haijin</title>
     <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
     
     <meta name="author" content="马海金">
     
 
     
-    <meta name="description" content="##IO模型是什么？个人理解IO模型就是应用程序进行IO操作时和操作系统的通信和协作方式。
-##为什么要学习IO模型？我个人在学习Netty、Mina等网络编程框架时，搜索网上资料以及看书的过程中，经常会碰到一些名词：同步、异步、阻塞、非阻塞、事件驱动、轮询等等。这些名词乍一看，貌似我都懂，但是仔细分析时又发现似懂非懂，其实根本原因还是对于Unix的IO模型没有完全理解。
-##Unix中有哪些IO">
-<meta property="og:type" content="article">
-<meta property="og:title" content="【原创】Linux学习系列-IO模型">
-<meta property="og:url" content="http://yoursite.com/2015/01/06/Linux学习系列-IO模型/index.html">
+    <meta name="description">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Ma Haijin">
+<meta property="og:url" content="http://yoursite.com/page/4/index.html">
 <meta property="og:site_name" content="Ma Haijin">
-<meta property="og:description" content="##IO模型是什么？个人理解IO模型就是应用程序进行IO操作时和操作系统的通信和协作方式。
-##为什么要学习IO模型？我个人在学习Netty、Mina等网络编程框架时，搜索网上资料以及看书的过程中，经常会碰到一些名词：同步、异步、阻塞、非阻塞、事件驱动、轮询等等。这些名词乍一看，貌似我都懂，但是仔细分析时又发现似懂非懂，其实根本原因还是对于Unix的IO模型没有完全理解。
-##Unix中有哪些IO">
-<meta property="og:image" content="http://7xj5jf.com1.z0.glb.clouddn.com/1.png">
-<meta property="og:image" content="http://7xj5jf.com1.z0.glb.clouddn.com/2.png">
-<meta property="og:image" content="http://7xj5jf.com1.z0.glb.clouddn.com/3.png">
-<meta property="og:image" content="http://7xj5jf.com1.z0.glb.clouddn.com/4.png">
-<meta property="og:image" content="http://7xj5jf.com1.z0.glb.clouddn.com/5.png">
-<meta property="og:updated_time" content="2015-05-26T14:10:23.000Z">
+<meta property="og:description">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="【原创】Linux学习系列-IO模型">
-<meta name="twitter:description" content="##IO模型是什么？个人理解IO模型就是应用程序进行IO操作时和操作系统的通信和协作方式。
-##为什么要学习IO模型？我个人在学习Netty、Mina等网络编程框架时，搜索网上资料以及看书的过程中，经常会碰到一些名词：同步、异步、阻塞、非阻塞、事件驱动、轮询等等。这些名词乍一看，貌似我都懂，但是仔细分析时又发现似懂非懂，其实根本原因还是对于Unix的IO模型没有完全理解。
-##Unix中有哪些IO">
+<meta name="twitter:title" content="Ma Haijin">
+<meta name="twitter:description">
 
     
     <link rel="alternative" href="/atom.xml" title="Ma Haijin" type="application/atom+xml">
@@ -85,10 +73,159 @@
 </div>
     </header>
     <div id="container">
-      <div id="main" class="post" itemscope itemprop="blogPost">
+      <div id="main">
+
+   
+    
+    <article class="post-expand post" itemprop="articleBody"> 
+        <header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2015/01/11/Linux学习系列-进程间通信/" title="【原创】Linux学习系列-进程间通信" itemprop="url">【原创】Linux学习系列-进程间通信</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="马海金" target="_blank" itemprop="author">马海金</a>
+		
+  <p class="article-time">
+    <time datetime="2015-01-11T02:32:00.000Z" itemprop="datePublished"> 發表於 2015-01-11</time>
+    
+  </p>
+</header>
+    <div class="article-content">
+        
+        <p>#管道</p>
+<blockquote>
+<pre><code>管道
+</code></pre><p><img src="/~/管道.png" alt=""></p>
+</blockquote>
+<p>#FIFO(命名管道)</p>
+<p>#消息队里</p>
+<p>#信号量</p>
+<p>#共享内存区</p>
+<p>#套接字</p>
+
+        
+        
+        <p class="article-more-link">
+          
+       </p>
+    </div>
+    <footer class="article-footer clearfix">
+<div class="article-catetags">
+
+
+</div>
+
+
+
+
+<div class="comments-count">
+	
+</div>
+
+</footer>
+
+
+    </article>
+
+
+
+
+
+
+   
+    
+    <article class="post-expand post" itemprop="articleBody"> 
+        <header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2015/01/08/Linux学习系列-轮询函数/" title="【原创】Linux学习系列-轮询函数" itemprop="url">【原创】Linux学习系列-轮询函数</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="马海金" target="_blank" itemprop="author">马海金</a>
+		
+  <p class="article-time">
+    <time datetime="2015-01-08T13:46:00.000Z" itemprop="datePublished"> 發表於 2015-01-08</time>
+    
+  </p>
+</header>
+    <div class="article-content">
+        
+        <p>理解这三个轮询函数差异的关键在于理解其轮询的文件描述符（socket也是文件）的数据结构。</p>
+<p>##select轮询函数</p>
+<p>函数定义：</p>
+ <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">select</span><span class="params">(<span class="keyword">int</span> nfds, fd_set *readfds, fd_set *writefds, fd_set *exeptfds, <span class="keyword">struct</span> timeval *timeout)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// fd_set操作宏</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">FD_SET</span><span class="params">(<span class="keyword">int</span> fd, fd_set *fdset)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">FD_CLR</span><span class="params">(<span class="keyword">int</span> fd, fd_set *fdset)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">FD_ISSET</span><span class="params">(<span class="keyword">int</span> fd, fd_set *fdset)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">FD_ZERO</span><span class="params">(fd_set *fdset)</span></span>;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>nfds参数指定被监听的文件描述符总数；</li>
+<li>readfds、writefds、exeptfds参数分别指向可读、可写和异常事件的accept到的对应的文件描述符集合；fd_set中用一个整型数组的每一个元素的每一位（bit）来表示每一个文件描述符是否有相应的事件发生（0表示有；1表示没有），那么理论上fd_set就可以表示【数组长度*32】个文件描述符，而数组长度由FD_SETSIZE 来设置，一般是1024。在select之前，每次先调用FD_SET()设置accept到的文件描述符标记位为1，表示需要监听这个文件描述符需要监听可读、可写或者异常事件；当有可读、可写和异常事件发生时，在select调用过程中，内核会修改相应的这三个文件描述符集合中的没有事件发生的文件描述符标记位为0；在select之后，应用程序就可以轮询accept到的所有文件描述符，并通过FD_ISSET来判断该文件描述符是否有事件发生（fd_set中对应的文件描述符标记位是1表示有事件发生）。</li>
+<li>timeout就是轮询时间片，表示多久轮询一次。</li>
+</ul>
+<p>##这种函数设计实现，有三个缺陷：##</p>
+<ol>
+<li>监听的事件类型有限，只有3种；</li>
+<li>readfds、writefds和exeptfds有两重角色，第一层是当做要监听的文件描述符集合来传给内核监听；第二层是当做发生事件的文件描述符结果集合。因此每次轮询处理完事件，需要重新设置需要监听的文件描述符；</li>
+<li>事件和文件描述符没有绑定，因此要处理事件需要轮询所有的已accept到的文件描述符。</li>
+</ol>
+<p>##poll轮询函数<br>函数定义：<br> <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">poll</span><span class="params">(<span class="keyword">struct</span> pollfd *fds, nfds_t nfds, <span class="keyword">int</span> timeout)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> pollfd</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">int</span> fd;  <span class="comment">//文件描述符</span></span><br><span class="line">    <span class="keyword">short</span> events;  <span class="comment">//注册的事件</span></span><br><span class="line">    <span class="keyword">short</span> revents  <span class="comment">//实际发生的事件，由内核填充</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li>fds是需要监听的文件描述符集合，它是一个pollfd结构体的数组。</li>
+<li>nfds是监听的文件描述符的数量，也就是fds数组的长度。</li>
+</ul>
+<p>说明：与select相比这种函数设计清晰简洁，将文件描述符和事件通过pollfd结构体来进行了绑定，并且区分了注册的时间和实际发生的事件。但是其和select一样，最终轮询的结果都是所有已经注册的文件描述符的集合。</p>
+<p>##epoll轮询函数<br>函数定义:<br> <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 创建内核事件表，返回的就是事件表的文件描述符 */</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">epoll_create</span><span class="params">(<span class="keyword">int</span> size)</span></span>; </span><br><span class="line"><span class="comment">/* 往内核事件表注册、修改、删除指定fd上的事件 */</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">epoll_ctl</span><span class="params">(<span class="keyword">int</span> epfd, <span class="keyword">int</span> op, <span class="keyword">int</span> fd, <span class="keyword">struct</span> epoll_event *event)</span></span>; </span><br><span class="line"><span class="comment">/* 轮询检测事件 */</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">epoll_wait</span><span class="params">(<span class="keyword">int</span> epfd, <span class="keyword">struct</span> epoll_event *events, <span class="keyword">int</span> maxevents, <span class="keyword">int</span> timeout)</span></span>;</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li>epoll和select、poll有明显不同，其提供了一套函数。它会在内核开辟一个事件表用于存储注册的事件。</li>
+<li>epoll_ctl中的epfd就是epoll_create的返回值，表示内核事件表的文件描述符；op就是操作，包括注册、删除、修改；fd表示要操作的文件描述符；event表示要注册到fd上的事件，需要特别之处epoll_event结构实现了事件和文件描述符的绑定。</li>
+<li>epoll_wait是轮询函数，如果检测到事件，就将所有就绪的事件从内核事件表中的拷贝到第二个参数指向的数组events中。这和select、poll有明显区别，这提高了应用程序轮询就绪事件的效率。</li>
+<li>epoll还有一个特殊的地方在于，其存在两种模式：LT（电平触发）和ET（边沿触发）。LT是默认工作模式，而当往内核事件表注册一个文件描述符的EPOLLET事件时，epoll将以ET模式来操作文件描述符。ET是一种高效模式。LT模式下，当epoll_wait检测到事件时，应用程序可以不用立即处理，下次epoll_wait时还会再次通告应用程序；ET模式下，应用程序必须立即处理事件，因此避免了epoll_wait重复触发事件的次数，因此较高效。</li>
+</ul>
+<p>##统一事件源<br>我们这里讲的统一事件源中的事件源是指IO事件和信号。信号原理可以参见《Linux学习系列-信号》。通常我们通过轮询函数来处理IO事件，既然要统一，那么自然也要使用轮询函数来处理信号。典型的处理方案是：信号发生时，信号处理函数一般通过管道来通知程序主循环信号值，那么主循环中的轮询函数就可以通过轮询函数来监听管道上的IO事件即可。这样就实现了IO事件和信号的统一处理。</p>
+
+        
+        
+        <p class="article-more-link">
+          
+       </p>
+    </div>
+    <footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/Linux/">Linux</a>
+</div>
+
+
+  <div class="article-tags">
   
-	<article itemprop="articleBody"> 
-		<header class="article-info clearfix">
+  <span></span> <a href="/tags/epoll/">epoll</a><a href="/tags/统一事件源/">统一事件源</a>
+  </div>
+
+</div>
+
+
+
+
+<div class="comments-count">
+	
+</div>
+
+</footer>
+
+
+    </article>
+
+
+
+
+
+
+   
+    
+    <article class="post-expand post" itemprop="articleBody"> 
+        <header class="article-info clearfix">
   <h1 itemprop="name">
     
       <a href="/2015/01/06/Linux学习系列-IO模型/" title="【原创】Linux学习系列-IO模型" itemprop="url">【原创】Linux学习系列-IO模型</a>
@@ -102,16 +239,9 @@
     
   </p>
 </header>
-	<div class="article-content">
-		
-		<div id="toc" class="toc-article">
-			<strong class="toc-title">文章目錄</strong>
-		
-			
-		
-		</div>
-		
-		<p>##IO模型是什么？<br>个人理解IO模型就是应用程序进行IO操作时和操作系统的通信和协作方式。</p>
+    <div class="article-content">
+        
+        <p>##IO模型是什么？<br>个人理解IO模型就是应用程序进行IO操作时和操作系统的通信和协作方式。</p>
 <p>##为什么要学习IO模型？<br>我个人在学习Netty、Mina等网络编程框架时，搜索网上资料以及看书的过程中，经常会碰到一些名词：同步、异步、阻塞、非阻塞、事件驱动、轮询等等。这些名词乍一看，貌似我都懂，但是仔细分析时又发现似懂非懂，其实根本原因还是对于Unix的IO模型没有完全理解。</p>
 <p>##Unix中有哪些IO模型？<br>Unix中总共定义了五种IO模型：</p>
 <ol>
@@ -136,9 +266,14 @@
 <p>##5.异步IO模型</p>
 <p><img src="http://7xj5jf.com1.z0.glb.clouddn.com/5.png" alt=""></p>
 <p>从理论上讲，阻塞IO、IO复用和信号驱动IO都是同步模型。因为这三种IO模型中，IO读写操作（将数据从内核缓冲区读入用户缓冲区或将数据从用户缓冲区写入内核缓冲区），都是在IO事件发生之后，由应用程序来完成的。而POSIX规范所定义的异步IO模型则不同。对异步IO而言，用户可以直接对IO进行读写操作，这些操作告诉内核用户读写缓冲区的位置，以及IO操作完成之后内核通知应用程序的方式。异步IO的读写操作总是立即返回，而不论IO是否阻塞的，因为真正的读写操作已经由内核接管。也就是说，同步IO模型要求用户代码自行执行IO操作（将数据从内核缓冲区读入用户缓冲区或将数据从用户缓冲区写入内核缓冲区），而异步IO机制则由内核来执行IO操作（数据在内核缓冲区和用户缓冲区见的移动是有内核在后台完成的）。可以这样理解，同步IO向程序通知的是IO就绪事件，而异步IO向应用程序通知的IO完成事件。</p>
-  
-	</div>
-		<footer class="article-footer clearfix">
+
+        
+        
+        <p class="article-more-link">
+          
+       </p>
+    </div>
+    <footer class="article-footer clearfix">
 <div class="article-catetags">
 
 <div class="article-categories">
@@ -156,51 +291,90 @@
 
 
 
-	<div class="article-share" id="share">
-	
-	  <div data-url="http://yoursite.com/2015/01/06/Linux学习系列-IO模型/" data-title="【原创】Linux学习系列-IO模型 | Ma Haijin" data-tsina="null" class="share clearfix">
-	  </div>
-	
-	</div>
 
+<div class="comments-count">
+	
+</div>
 
 </footer>
 
-   	       
-	</article>
-	
-<nav class="article-nav clearfix">
- 
- <div class="prev" >
- <a href="/2015/01/08/Linux学习系列-轮询函数/" title="【原创】Linux学习系列-轮询函数">
-  <strong>上一篇：</strong><br/>
-  <span>
-  【原创】Linux学习系列-轮询函数</span>
-</a>
+
+    </article>
+
+
+
+
+
+
+   
+    
+    <article class="post-expand post" itemprop="articleBody"> 
+        <header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2015/01/05/Linux学习系列-浅析EXT2文件系统/" title="【原创】Linux学习系列-浅析EXT2文件系统" itemprop="url">【原创】Linux学习系列-浅析EXT2文件系统</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="马海金" target="_blank" itemprop="author">马海金</a>
+		
+  <p class="article-time">
+    <time datetime="2015-01-05T13:55:00.000Z" itemprop="datePublished"> 發表於 2015-01-05</time>
+    
+  </p>
+</header>
+    <div class="article-content">
+        
+        <p>注:EXT2文件系统是早期Unix系统采用的文件系统，目前比较新的EXT3也是继承了EXT2大部分特性拓展而来，因此学习Linux文件从EXT2开始会比较好入手。</p>
+<p>##文件系统是什么？<br>标准定义参见维基百科<a href="http://zh.wikipedia.org/wiki/文件系统" target="_blank" rel="external">【文件系统】</a>。说说我自己作为程序员的理解，从我工作的角度看，狭义点说，文件系统就是专指信息在硬盘上的存储和组织方式。文件是文件系统中组织信息的最小逻辑单元，目录其实也是一种特殊的文件（其内容存储的是普通文件列表）。文件其实是由目录项、i节点和数据块组成的。目录项又是由文件名和i节点编号组成的；i节点中包含了文件的修改时间、类型、数据块指针等等信息。</p>
+<p>##文件系统是怎样存储信息的呢？<br>下边的图是根据自己看书的理解绘制而成。这里扯点闲话，自己动手绘图对于加深理解相当重要，绘图的过程其实就是思考和总结的过程，而且比纯文字总结来得更加印象深刻。哪怕是照着书本中的图重新绘制一遍，也有很大作用。<br><img src="http://7xj5jf.com1.z0.glb.clouddn.com/23-10-10.jpg" alt=""></p>
+
+        
+        
+        <p class="article-more-link">
+          
+       </p>
+    </div>
+    <footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/Linux/">Linux</a>
 </div>
 
 
-<div class="next">
-<a href="/2015/01/05/Linux学习系列-浅析EXT2文件系统/"  title="【原创】Linux学习系列-浅析EXT2文件系统">
- <strong>下一篇：</strong><br/> 
- <span>【原创】Linux学习系列-浅析EXT2文件系统
-</span>
-</a>
-</div>
-
-</nav>
-
-	
-
-</div>  
-      <div class="openaside"><a class="navbutton" href="#" title="顯示側邊欄"></a></div>
-
-  <div id="toc" class="toc-aside">
-  <strong class="toc-title">文章目錄</strong>
- 
- 
- 
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/Linux/">Linux</a><a href="/tags/文件系统/">文件系统</a>
   </div>
+
+</div>
+
+
+
+
+<div class="comments-count">
+	
+</div>
+
+</footer>
+
+
+    </article>
+
+
+
+
+
+
+
+  <nav id="page-nav" class="clearfix">
+    <a class="extend prev" rel="prev" href="/page/3/"><span></span>Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span>
+  </nav>
+
+</div>
+      <div class="openaside"><a class="navbutton" href="#" title="顯示側邊欄"></a></div>
 
 <div id="asidepart">
 <div class="closeaside"><a class="closebutton" href="#" title="隱藏側邊欄"></a></div>
@@ -481,89 +655,12 @@ $(document).ready(function(){
       m.removeClass('moveMain');
       a.css('display', 'block').removeClass('fadeOut');
       o.css('display', 'none');
-      
-      $('#toc.toc-aside').css('display', 'none');
         
     }
   });
 });
 </script>
 
-<script type="text/javascript">
-$(document).ready(function(){ 
-  var ai = $('.article-content>iframe'),
-      ae = $('.article-content>embed'),
-      t  = $('#toc'),
-      ta = $('#toc.toc-aside'),
-      o  = $('.openaside'),
-      c  = $('.closeaside');
-  if(ai.length>0){
-    ai.wrap('<div class="video-container" />');
-  };
-  if(ae.length>0){
-   ae.wrap('<div class="video-container" />');
-  };
-  c.click(function(){
-    ta.css('display', 'block').addClass('fadeIn');
-  });
-  o.click(function(){
-    ta.css('display', 'none');
-  });
-  $(window).scroll(function(){
-    ta.css("top",Math.max(140,320-$(this).scrollTop()));
-  });
-});
-</script>
-
-
-<script type="text/javascript">
-$(document).ready(function(){ 
-  var $this = $('.share'),
-      url = $this.attr('data-url'),
-      encodedUrl = encodeURIComponent(url),
-      title = $this.attr('data-title'),
-      tsina = $this.attr('data-tsina'),
-      description = $this.attr('description');
-  var html = [
-  '<div class="hoverqrcode clearfix"></div>',
-  '<a class="overlay" id="qrcode"></a>',
-  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
-  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
-  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
-  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
-  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
-  '<span title="Share to"></span>'
-  ].join('');
-  $this.append(html);
-
-  $('.hoverqrcode').hide();
-
-  var myWidth = 0;
-  function updatehoverqrcode(){
-    if( typeof( window.innerWidth ) == 'number' ) {
-      myWidth = window.innerWidth;
-    } else if( document.documentElement && document.documentElement.clientWidth) {
-      myWidth = document.documentElement.clientWidth;
-    };
-    var qrsize = myWidth > 1024 ? 200:100;
-    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
-    var p = $('.article-share-qrcode').position();
-    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
-                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
-                          .qrcode(options);
-  };
-  $(window).resize(function(){
-    $('.hoverqrcode').hide();
-  });
-  $('.article-share-qrcode').click(function(){
-    updatehoverqrcode();
-    $('.hoverqrcode').toggle();
-  });
-  $('.article-share-qrcode').hover(function(){}, function(){
-      $('.hoverqrcode').hide();
-  });
-});   
-</script>
 
 
 
@@ -634,4 +731,4 @@ var _hmt = _hmt || [];
 <!-- Tiny_search End -->
 
   </body>
-</html>
+ </html>

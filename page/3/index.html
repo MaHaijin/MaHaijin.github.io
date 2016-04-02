@@ -5,29 +5,42 @@
   <meta charset="UTF-8">
   
     <title>Hexo</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=3, minimum-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
     
     <meta name="author" content="John Doe">
     
+
     
+    <meta name="description">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Hexo">
+<meta property="og:url" content="http://yoursite.com/page/3/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Hexo">
+<meta name="twitter:description">
+
     
+    <link rel="alternative" href="/atom.xml" title="Hexo" type="application/atom+xml">
     
     
     <link rel="icon" href="/img/favicon.ico">
     
     
-    <link rel="apple-touch-icon" href="/img/pacman.jpg">
-    <link rel="apple-touch-icon-precomposed" href="/img/pacman.jpg">
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
     
     <link rel="stylesheet" href="/css/style.css" type="text/css">
 </head>
 
   <body>
     <header>
-      <div>
+      
+<div>
 		
 			<div id="imglogo">
-				<a href="/"><img src="/img/logo.svg" alt="Hexo" title="Hexo"/></a>
+				<a href="/"><img src="/img/logo.png" alt="Hexo" title="Hexo"/></a>
 			</div>
 			
 			<div id="textlogo">
@@ -38,16 +51,19 @@
 			</a></div>
 			<nav class="animated">
 				<ul>
-					
+					<ul>
+					 
 						<li><a href="/">Home</a></li>
 					
 						<li><a href="/archives">Archives</a></li>
 					
-					<li>
+						<li><a href="/about">About</a></li>
 					
+					<li>
+ 					
 					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
 						<label>Search</label>
-						<input type="text" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
 						<input type="hidden" name="q" value="site:yoursite.com">
 					</form>
 					
@@ -55,44 +71,159 @@
 				</ul>
 			</nav>			
 </div>
-
     </header>
     <div id="container">
       <div id="main">
 
-  <section class="post" itemscope itemprop="blogPost">
-  
-    <a href="/2015/01/06/Linux学习系列-IO模型/" title="【原创】Linux学习系列-IO模型" itemprop="url">
-  
-    <h1 itemprop="name">【原创】Linux学习系列-IO模型</h1>
+   
     
-     
-           <p itemprop="description" >##IO模型是什么？个人理解IO模型就是应用程序进行IO操作时和操作系统的通信和协作方式。
-##为什么要学习IO模型？我个人在学习Netty、Mina等网络编程框架时，搜索网上资料以及看书的过程中，经常会碰到一些名词：同步、异步、阻塞、非阻塞、事件驱动、轮询等等。这些名词乍一看，</p>
+    <article class="post-expand post" itemprop="articleBody"> 
+        <header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2015/01/06/Linux学习系列-IO模型/" title="【原创】Linux学习系列-IO模型" itemprop="url">【原创】Linux学习系列-IO模型</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="John Doe" target="_blank" itemprop="author">John Doe</a>
+		
+  <p class="article-time">
+    <time datetime="2015-01-06T13:02:00.000Z" itemprop="datePublished"> 發表於 2015-01-06</time>
+    
+  </p>
+</header>
+    <div class="article-content">
         
-    
-    <time datetime="2015-01-06T13:02:00.000Z" itemprop="datePublished">2015-01-06</time>
-  </a>
-</section>
+        <p>##IO模型是什么？<br>个人理解IO模型就是应用程序进行IO操作时和操作系统的通信和协作方式。</p>
+<p>##为什么要学习IO模型？<br>我个人在学习Netty、Mina等网络编程框架时，搜索网上资料以及看书的过程中，经常会碰到一些名词：同步、异步、阻塞、非阻塞、事件驱动、轮询等等。这些名词乍一看，貌似我都懂，但是仔细分析时又发现似懂非懂，其实根本原因还是对于Unix的IO模型没有完全理解。</p>
+<p>##Unix中有哪些IO模型？<br>Unix中总共定义了五种IO模型：</p>
+<ol>
+<li>阻塞式IO模型</li>
+<li>非阻塞式IO模型</li>
+<li>IO复用模型</li>
+<li>信号驱动式IO模型</li>
+<li>异步IO模型</li>
+</ol>
+<p>##图例说明<br>下面的五幅IO模型图均出自《Unix网络编程卷一：套接字API》。这些图均是以UDP编程API为例子来说明，所以不会看到熟悉的TCP方法。理解这些图，首先需要对于Unix操作系统有一定深度的理解，内核空间和用户空间要明白各自是什么？并且要明白，应用程序和内核有各自的缓冲区，这也是理解异步IO的关键所在！</p>
+<p>##1.阻塞式IO模型</p>
+<p><img src="http://7xj5jf.com1.z0.glb.clouddn.com/1.png" alt=""></p>
+<p>##2.非阻塞式IO模型</p>
+<p><img src="http://7xj5jf.com1.z0.glb.clouddn.com/2.png" alt=""></p>
+<p>阻塞和非阻塞的关键在于应用进程的系统调用是否立即返回？如果立即返回，则称之为非阻塞；反之亦然。对于非阻塞，显然是以应用进程的反复的系统调用为代价来换取及时响应，以达到释放应用进程的目的。从性能角度讲，单从一次完整的IO调用（从发起调用到获得结果）来看，非阻塞的多次系统调用会增加CPU的负载；但是如果从大量的IO调用来看，阻塞IO会占用大量的进程，而进程又是一个稀缺资源，并且进程的增加同样会因为CPU进行大量的上下文切换而严重增加CPU的负载！看来量变引起质变的原理，同样适用于这里！</p>
+<p>##3.IO复用模型</p>
+<p><img src="http://7xj5jf.com1.z0.glb.clouddn.com/3.png" alt=""></p>
+<p>很多人对于IO复用模型和非阻塞模型比较困惑，没有理解两者之间的那点区别！其实，IO复用的重点是“复用”二字，其核心概念就是一个进程来监控多个Socket的IO事件；而对于非阻塞IO来说，一个进程只能监控一个Socket的IO事件。在编码层面，就是利用轮询函数来实现对于多个Socket的监听，目前的轮询函数包括：select()、poll()、epoll()，这三个轮询函数的区别，后续会单独成文《Linux学习系列-轮询函数》。</p>
+<p>##4.信号驱动式IO模型</p>
+<p><img src="http://7xj5jf.com1.z0.glb.clouddn.com/4.png" alt=""></p>
+<p>信号驱动式IO模型其实很简单，就是利用IO事件触发的SIGIO信号和其回调函数，在回调函数进行IO处理或者通过回调函数通知应用进程主循环进行IO处理。我们经常在一些网络框架中看到其支持“统一事件源“，其实就是IO复用模型和信号驱动模型的整合，在轮询函数中不但监听IO事件，而且监听信号（事件）。对于”统一事件源“会在《Linux学习系列-轮询函数》中做详细阐述。</p>
+<p>##5.异步IO模型</p>
+<p><img src="http://7xj5jf.com1.z0.glb.clouddn.com/5.png" alt=""></p>
+<p>从理论上讲，阻塞IO、IO复用和信号驱动IO都是同步模型。因为这三种IO模型中，IO读写操作（将数据从内核缓冲区读入用户缓冲区或将数据从用户缓冲区写入内核缓冲区），都是在IO事件发生之后，由应用程序来完成的。而POSIX规范所定义的异步IO模型则不同。对异步IO而言，用户可以直接对IO进行读写操作，这些操作告诉内核用户读写缓冲区的位置，以及IO操作完成之后内核通知应用程序的方式。异步IO的读写操作总是立即返回，而不论IO是否阻塞的，因为真正的读写操作已经由内核接管。也就是说，同步IO模型要求用户代码自行执行IO操作（将数据从内核缓冲区读入用户缓冲区或将数据从用户缓冲区写入内核缓冲区），而异步IO机制则由内核来执行IO操作（数据在内核缓冲区和用户缓冲区见的移动是有内核在后台完成的）。可以这样理解，同步IO向程序通知的是IO就绪事件，而异步IO向应用程序通知的IO完成事件。</p>
 
-  <section class="post" itemscope itemprop="blogPost">
-  
-    <a href="/2015/01/05/Linux学习系列-浅析EXT2文件系统/" title="【原创】Linux学习系列-浅析EXT2文件系统" itemprop="url">
-  
-    <h1 itemprop="name">【原创】Linux学习系列-浅析EXT2文件系统</h1>
-    
-     
-           <p itemprop="description" >注:EXT2文件系统是早期Unix系统采用的文件系统，目前比较新的EXT3也是继承了EXT2大部分特性拓展而来，因此学习Linux文件从EXT2开始会比较好入手。
-##文件系统是什么？标准定义参见维基百科【文件系统】。说说我自己作为程序员的理解，从我工作的角度看，狭义点说，文件系</p>
         
+        
+        <p class="article-more-link">
+          
+       </p>
+    </div>
+    <footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/Linux/">Linux</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/IO模型/">IO模型</a><a href="/tags/Linux/">Linux</a>
+  </div>
+
+</div>
+
+
+
+
+<div class="comments-count">
+	
+</div>
+
+</footer>
+
+
+    </article>
+
+
+
+
+
+
+   
     
-    <time datetime="2015-01-05T13:55:00.000Z" itemprop="datePublished">2015-01-05</time>
-  </a>
-</section>
+    <article class="post-expand post" itemprop="articleBody"> 
+        <header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2015/01/05/Linux学习系列-浅析EXT2文件系统/" title="【原创】Linux学习系列-浅析EXT2文件系统" itemprop="url">【原创】Linux学习系列-浅析EXT2文件系统</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="John Doe" target="_blank" itemprop="author">John Doe</a>
+		
+  <p class="article-time">
+    <time datetime="2015-01-05T13:55:00.000Z" itemprop="datePublished"> 發表於 2015-01-05</time>
+    
+  </p>
+</header>
+    <div class="article-content">
+        
+        <p>注:EXT2文件系统是早期Unix系统采用的文件系统，目前比较新的EXT3也是继承了EXT2大部分特性拓展而来，因此学习Linux文件从EXT2开始会比较好入手。</p>
+<p>##文件系统是什么？<br>标准定义参见维基百科<a href="http://zh.wikipedia.org/wiki/文件系统" target="_blank" rel="external">【文件系统】</a>。说说我自己作为程序员的理解，从我工作的角度看，狭义点说，文件系统就是专指信息在硬盘上的存储和组织方式。文件是文件系统中组织信息的最小逻辑单元，目录其实也是一种特殊的文件（其内容存储的是普通文件列表）。文件其实是由目录项、i节点和数据块组成的。目录项又是由文件名和i节点编号组成的；i节点中包含了文件的修改时间、类型、数据块指针等等信息。</p>
+<p>##文件系统是怎样存储信息的呢？<br>下边的图是根据自己看书的理解绘制而成。这里扯点闲话，自己动手绘图对于加深理解相当重要，绘图的过程其实就是思考和总结的过程，而且比纯文字总结来得更加印象深刻。哪怕是照着书本中的图重新绘制一遍，也有很大作用。<br><img src="http://7xj5jf.com1.z0.glb.clouddn.com/23-10-10.jpg" alt=""></p>
+
+        
+        
+        <p class="article-more-link">
+          
+       </p>
+    </div>
+    <footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/Linux/">Linux</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/Linux/">Linux</a><a href="/tags/文件系统/">文件系统</a>
+  </div>
+
+</div>
+
+
+
+
+<div class="comments-count">
+	
+</div>
+
+</footer>
+
+
+    </article>
+
+
+
+
+
 
 
   <nav id="page-nav" class="clearfix">
-    <a class="extend prev" rel="prev" href="/page/2/">&laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span>
+    <a class="extend prev" rel="prev" href="/page/2/"><span></span>Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span>
   </nav>
 
 </div>
@@ -103,31 +234,56 @@
 <aside class="clearfix">
 
   
+
+
+  
 <div class="categorieslist">
 	<p class="asidetitle">分類</p>
 		<ul>
 		
+		  
 			<li><a href="/categories/JVM/" title="JVM">JVM<sup>1</sup></a></li>
+		  
 		
+		  
 			<li><a href="/categories/Linux/" title="Linux">Linux<sup>4</sup></a></li>
+		  
 		
+		  
 			<li><a href="/categories/协议/" title="协议">协议<sup>1</sup></a></li>
+		  
 		
+		  
 			<li><a href="/categories/基准测试/" title="基准测试">基准测试<sup>1</sup></a></li>
+		  
 		
+		  
 			<li><a href="/categories/并发编程/" title="并发编程">并发编程<sup>5</sup></a></li>
+		  
 		
+		  
 			<li><a href="/categories/开源框架/" title="开源框架">开源框架<sup>1</sup></a></li>
+		  
 		
+		  
 			<li><a href="/categories/所思所想/" title="所思所想">所思所想<sup>1</sup></a></li>
+		  
 		
+		  
 			<li><a href="/categories/数据库/" title="数据库">数据库<sup>1</sup></a></li>
+		  
 		
+		  
 			<li><a href="/categories/架构/" title="架构">架构<sup>1</sup></a></li>
+		  
 		
+		  
 			<li><a href="/categories/缓存实现/" title="缓存实现">缓存实现<sup>1</sup></a></li>
+		  
 		
+		  
 			<li><a href="/categories/项目管理/" title="项目管理">项目管理<sup>1</sup></a></li>
+		  
 		
 		</ul>
 </div>
@@ -138,53 +294,121 @@
 	<p class="asidetitle">標簽</p>
 		<ul class="clearfix">
 		
-			<li><a href="/tags/DirectBuffer/" title="DirectBuffer">DirectBuffer<sup>1</sup></a></li>
+			
+				<li><a href="/tags/Netty/" title="Netty">Netty<sup>4</sup></a></li>
+			
 		
-			<li><a href="/tags/DirectIO/" title="DirectIO">DirectIO<sup>1</sup></a></li>
+			
+				<li><a href="/tags/MySQL/" title="MySQL">MySQL<sup>3</sup></a></li>
+			
 		
-			<li><a href="/tags/Future/" title="Future">Future<sup>1</sup></a></li>
+			
+				<li><a href="/tags/Linux/" title="Linux">Linux<sup>3</sup></a></li>
+			
 		
-			<li><a href="/tags/Grizzly/" title="Grizzly">Grizzly<sup>1</sup></a></li>
+			
+				<li><a href="/tags/memcached/" title="memcached">memcached<sup>2</sup></a></li>
+			
 		
-			<li><a href="/tags/IO模型/" title="IO模型">IO模型<sup>1</sup></a></li>
+			
+				<li><a href="/tags/c3p0/" title="c3p0">c3p0<sup>1</sup></a></li>
+			
 		
-			<li><a href="/tags/Java-Heap/" title="Java Heap">Java Heap<sup>1</sup></a></li>
+			
+				<li><a href="/tags/sysbench/" title="sysbench">sysbench<sup>1</sup></a></li>
+			
 		
-			<li><a href="/tags/Linux/" title="Linux">Linux<sup>3</sup></a></li>
+			
+				<li><a href="/tags/Native-Memory/" title="Native Memory">Native Memory<sup>1</sup></a></li>
+			
 		
-			<li><a href="/tags/MySQL/" title="MySQL">MySQL<sup>3</sup></a></li>
+			
+				<li><a href="/tags/DirectBuffer/" title="DirectBuffer">DirectBuffer<sup>1</sup></a></li>
+			
 		
-			<li><a href="/tags/NIO/" title="NIO">NIO<sup>1</sup></a></li>
+			
+				<li><a href="/tags/Future/" title="Future">Future<sup>1</sup></a></li>
+			
 		
-			<li><a href="/tags/Native-Memory/" title="Native Memory">Native Memory<sup>1</sup></a></li>
+			
+				<li><a href="/tags/方法论/" title="方法论">方法论<sup>1</sup></a></li>
+			
 		
-			<li><a href="/tags/Netty/" title="Netty">Netty<sup>4</sup></a></li>
+			
+				<li><a href="/tags/项目管理/" title="项目管理">项目管理<sup>1</sup></a></li>
+			
 		
-			<li><a href="/tags/SendFile/" title="SendFile">SendFile<sup>1</sup></a></li>
+			
+				<li><a href="/tags/架构/" title="架构">架构<sup>1</sup></a></li>
+			
 		
-			<li><a href="/tags/TCP/" title="TCP">TCP<sup>1</sup></a></li>
+			
+				<li><a href="/tags/Java-Heap/" title="Java Heap">Java Heap<sup>1</sup></a></li>
+			
 		
-			<li><a href="/tags/c3p0/" title="c3p0">c3p0<sup>1</sup></a></li>
+			
+				<li><a href="/tags/jdbc/" title="jdbc">jdbc<sup>1</sup></a></li>
+			
 		
-			<li><a href="/tags/epoll/" title="epoll">epoll<sup>1</sup></a></li>
+			
+				<li><a href="/tags/TCP/" title="TCP">TCP<sup>1</sup></a></li>
+			
 		
-			<li><a href="/tags/jdbc/" title="jdbc">jdbc<sup>1</sup></a></li>
+			
+				<li><a href="/tags/DirectIO/" title="DirectIO">DirectIO<sup>1</sup></a></li>
+			
 		
-			<li><a href="/tags/memcached/" title="memcached">memcached<sup>2</sup></a></li>
+			
+				<li><a href="/tags/性能优化/" title="性能优化">性能优化<sup>1</sup></a></li>
+			
 		
-			<li><a href="/tags/sysbench/" title="sysbench">sysbench<sup>1</sup></a></li>
+			
+				<li><a href="/tags/epoll/" title="epoll">epoll<sup>1</sup></a></li>
+			
 		
-			<li><a href="/tags/信号/" title="信号">信号<sup>1</sup></a></li>
+			
+				<li><a href="/tags/统一事件源/" title="统一事件源">统一事件源<sup>1</sup></a></li>
+			
 		
-			<li><a href="/tags/性能优化/" title="性能优化">性能优化<sup>1</sup></a></li>
+			
+				<li><a href="/tags/SendFile/" title="SendFile">SendFile<sup>1</sup></a></li>
+			
 		
 		</ul>
 </div>
 
 
-  <div class="rsspart">
-	<a href="null" target="_blank" title="rss">RSS 訂閱</a>
+  <div class="linkslist">
+  <p class="asidetitle">友情鏈接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="https://coderq.com" target="_blank" title="一个面向程序员交流分享的新一代社区">码农圈</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://wuchong.me" target="_blank" title="Jark&#39;s Blog">Jark&#39;s Blog</a>
+            
+          </li>
+        
+    </ul>
 </div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 訂閱</a>
+</div>
+
+  <div class="weiboshow">
+  <p class="asidetitle">新浪微博</p>
+    <iframe width="100%" height="119" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=119&fansRow=2&ptype=1&speed=0&skin=9&isTitle=1&noborder=1&isWeibo=0&isFans=0&uid=null&verifier=b3593ceb&dpc=1"></iframe>
+</div>
+
 
 </aside>
 </div>
@@ -197,21 +421,42 @@
 	</div>
 	
 	
-	<div class="social-font clearfix">
+	<section class="info">
+		<p> Hello ,I&#39;m Larry Page in Google. <br/>
+			This is my blog,believe it or not.</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		<a href="http://weibo.com/2176287895" target="_blank" class="icon-weibo" title="微博"></a>
+		
+		
+		
+		
+		
 		
 		
 		
 		
 		
 	</div>
-		<p class="copyright">Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/A-limon/pacman" target="_blank" title="Pacman">Pacman</a> © 2016 
+			
 		
-		<a href="http://yoursite.com" target="_blank" title="John Doe">John Doe</a>
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2016 
+		
+		<a href="/about" target="_blank" title="John Doe">John Doe</a>
+		
 		
 		</p>
 </div>
 </footer>
-    <script src="/js/jquery-2.1.0.min.js"></script>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
 <script type="text/javascript">
 $(document).ready(function(){ 
   $('.navbar').click(function(){
@@ -229,18 +474,6 @@ $(document).ready(function(){
       a = $('#asidepart'),
       c = $('.closeaside'),
       o = $('.openaside');
-  $(window).resize(function(){
-    getSize(); 
-    if (myWidth >= 1024) {
-      $('header nav').removeClass('shownav');
-    }else
-    {
-      m.removeClass('moveMain');
-      a.css('display', 'block').removeClass('fadeOut');
-      o.css('display', 'none');
-        
-    }
-  });
   c.click(function(){
     a.addClass('fadeOut').css('display', 'none');
     o.css('display', 'block').addClass('fadeIn');
@@ -254,6 +487,18 @@ $(document).ready(function(){
   $(window).scroll(function(){
     o.css("top",Math.max(80,260-$(this).scrollTop()));
   });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+        
+    }
+  });
 });
 </script>
 
@@ -262,6 +507,69 @@ $(document).ready(function(){
 
 
 
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?e6d1f421bbc9962127a50488f9ed37d1";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回頂部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
 
   </body>
  </html>

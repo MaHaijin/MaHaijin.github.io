@@ -11,30 +11,27 @@
     
 
     
-    <meta name="description" content="##背景知识c3p0是一个开源的、基于Java JDBC 规范的连接池管理框架。官网地址：[http://www.mchange.com/projects/c3p0/]
-##获取连接的过程
-
+    <meta name="description" content="背景知识c3p0是一个开源的、基于Java JDBC 规范的连接池管理框架。官网地址：[http://www.mchange.com/projects/c3p0/]
+获取连接的过程
 c3p0构造了一个Connection对象池。
-在对象池中有空闲对象时或者没有达到对象池最大数量时，获取Connection都会成功返回。但是要注意，获取到的Connection不一定是可用的(比如服务端My">
+在对象池中有空闲对象时或者没有达到对象池最大数量时，获取Connection都会成功返回。但是要注意，获取到的Connection不一定是可用的(比如服务端MySQL进程">
 <meta property="og:type" content="article">
 <meta property="og:title" content="【原创】C3P0连接超时分析">
 <meta property="og:url" content="http://yoursite.com/2015/01/20/c3p0超时机制分析/index.html">
 <meta property="og:site_name" content="Ma Haijin">
-<meta property="og:description" content="##背景知识c3p0是一个开源的、基于Java JDBC 规范的连接池管理框架。官网地址：[http://www.mchange.com/projects/c3p0/]
-##获取连接的过程
-
+<meta property="og:description" content="背景知识c3p0是一个开源的、基于Java JDBC 规范的连接池管理框架。官网地址：[http://www.mchange.com/projects/c3p0/]
+获取连接的过程
 c3p0构造了一个Connection对象池。
-在对象池中有空闲对象时或者没有达到对象池最大数量时，获取Connection都会成功返回。但是要注意，获取到的Connection不一定是可用的(比如服务端My">
+在对象池中有空闲对象时或者没有达到对象池最大数量时，获取Connection都会成功返回。但是要注意，获取到的Connection不一定是可用的(比如服务端MySQL进程">
 <meta property="og:image" content="http://7xj5jf.com1.z0.glb.clouddn.com/C3P0.png">
 <meta property="og:image" content="http://7xj5jf.com1.z0.glb.clouddn.com/query-timeout-mysql-jdbc-statement.png">
-<meta property="og:updated_time" content="2015-05-26T14:09:55.000Z">
+<meta property="og:updated_time" content="2016-04-02T09:24:29.445Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="【原创】C3P0连接超时分析">
-<meta name="twitter:description" content="##背景知识c3p0是一个开源的、基于Java JDBC 规范的连接池管理框架。官网地址：[http://www.mchange.com/projects/c3p0/]
-##获取连接的过程
-
+<meta name="twitter:description" content="背景知识c3p0是一个开源的、基于Java JDBC 规范的连接池管理框架。官网地址：[http://www.mchange.com/projects/c3p0/]
+获取连接的过程
 c3p0构造了一个Connection对象池。
-在对象池中有空闲对象时或者没有达到对象池最大数量时，获取Connection都会成功返回。但是要注意，获取到的Connection不一定是可用的(比如服务端My">
+在对象池中有空闲对象时或者没有达到对象池最大数量时，获取Connection都会成功返回。但是要注意，获取到的Connection不一定是可用的(比如服务端MySQL进程">
 
     
     <link rel="alternative" href="/atom.xml" title="Ma Haijin" type="application/atom+xml">
@@ -110,13 +107,12 @@ c3p0构造了一个Connection对象池。
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目錄</strong>
 		
-			
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u80CC_u666F_u77E5_u8BC6"><span class="toc-number">1.</span> <span class="toc-text">背景知识</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u83B7_u53D6_u8FDE_u63A5_u7684_u8FC7_u7A0B"><span class="toc-number">2.</span> <span class="toc-text">获取连接的过程</span></a></li></ol>
 		
 		</div>
 		
-		<p>##背景知识<br>c3p0是一个开源的、基于Java JDBC 规范的连接池管理框架。<br>官网地址：[<a href="http://www.mchange.com/projects/c3p0/" target="_blank" rel="external">http://www.mchange.com/projects/c3p0/</a>]</p>
-<p>##获取连接的过程</p>
-<ol>
+		<h2 id="u80CC_u666F_u77E5_u8BC6"><a href="#u80CC_u666F_u77E5_u8BC6" class="headerlink" title="背景知识"></a>背景知识</h2><p>c3p0是一个开源的、基于Java JDBC 规范的连接池管理框架。<br>官网地址：[<a href="http://www.mchange.com/projects/c3p0/" target="_blank" rel="external">http://www.mchange.com/projects/c3p0/</a>]</p>
+<h2 id="u83B7_u53D6_u8FDE_u63A5_u7684_u8FC7_u7A0B"><a href="#u83B7_u53D6_u8FDE_u63A5_u7684_u8FC7_u7A0B" class="headerlink" title="获取连接的过程"></a>获取连接的过程</h2><ol>
 <li>c3p0构造了一个Connection对象池。</li>
 <li>在对象池中有空闲对象时或者没有达到对象池最大数量时，获取Connection都会成功返回。但是要注意，获取到的Connection不一定是可用的(比如服务端MySQL进程挂起、或者服务器掉电等极端情况下)。</li>
 <li>由于空闲的Connetion不一定是可用的，所以c3p0会启用一个检查线程池来检查空闲对象的可用性。检查时，会将该空闲对象加入一个idleCheckResources(Set类型)；检查完成后，再做出删除操作。其实idleCheckResources就是unused（LinkedList）的一个浅层拷贝。空闲连接检查就是依靠执行select 1 sql来验证。</li>
@@ -191,7 +187,7 @@ c3p0构造了一个Connection对象池。
   <div id="toc" class="toc-aside">
   <strong class="toc-title">文章目錄</strong>
  
- 
+ <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u80CC_u666F_u77E5_u8BC6"><span class="toc-number">1.</span> <span class="toc-text">背景知识</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u83B7_u53D6_u8FDE_u63A5_u7684_u8FC7_u7A0B"><span class="toc-number">2.</span> <span class="toc-text">获取连接的过程</span></a></li></ol>
  
   </div>
 

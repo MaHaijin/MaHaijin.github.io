@@ -4,27 +4,27 @@
 <head>
   <meta charset="UTF-8">
   
-    <title>【原创】Linux学习系列-信号 | Ma Haijin</title>
+    <title>【原创】Spymemcached操作队列分析 | Ma Haijin</title>
     <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
     
     <meta name="author" content="马海金">
     
 
     
-    <meta name="description" content="#信号的定义和分类信号是软件中断，提供了典型的异步机制。每个信号有一个编号，信号分为两类：非实时信号和实时信号。0-31编号属于非实时信号；31-63编号属于实时信号。为什么会分为这两类信号呢？这个主要是因为历史原因，首先实现的是非实时信号，非实时信号也成为不可靠信号，是因为其实现机制导致这类信号可能会丢失；而实时信号，由于存在排队机制，所以不会丢失。关于这点会在信号的处理过程图示中详细阐述。
-#">
+    <meta name="description" content="Spymemcached是一个Memcached（一个高性能内存对象缓存系统）的开源客户端程序。其他MC客户端还有xmemcached、Memcached Client for Java等。我们使用MC客户端程序与MC服务端通信，实现set、get缓存的操作，MC支持的协议类型包括：ASCII 文本协议和二进制协议。
+Spymemcached使用Java NIO来实现，并且是单线程的，也就是说在S">
 <meta property="og:type" content="article">
-<meta property="og:title" content="【原创】Linux学习系列-信号">
-<meta property="og:url" content="http://yoursite.com/2015/01/11/Linux学习系列-信号/index.html">
+<meta property="og:title" content="【原创】Spymemcached操作队列分析">
+<meta property="og:url" content="http://yoursite.com/2015/04/07/Spymemcached操作队列分析/index.html">
 <meta property="og:site_name" content="Ma Haijin">
-<meta property="og:description" content="#信号的定义和分类信号是软件中断，提供了典型的异步机制。每个信号有一个编号，信号分为两类：非实时信号和实时信号。0-31编号属于非实时信号；31-63编号属于实时信号。为什么会分为这两类信号呢？这个主要是因为历史原因，首先实现的是非实时信号，非实时信号也成为不可靠信号，是因为其实现机制导致这类信号可能会丢失；而实时信号，由于存在排队机制，所以不会丢失。关于这点会在信号的处理过程图示中详细阐述。
-#">
-<meta property="og:image" content="http://7xj5jf.com1.z0.glb.clouddn.com/信号处理机制-1.png">
-<meta property="og:updated_time" content="2015-05-26T14:10:55.000Z">
+<meta property="og:description" content="Spymemcached是一个Memcached（一个高性能内存对象缓存系统）的开源客户端程序。其他MC客户端还有xmemcached、Memcached Client for Java等。我们使用MC客户端程序与MC服务端通信，实现set、get缓存的操作，MC支持的协议类型包括：ASCII 文本协议和二进制协议。
+Spymemcached使用Java NIO来实现，并且是单线程的，也就是说在S">
+<meta property="og:image" content="http://7xj5jf.com1.z0.glb.clouddn.com/Spymemcached.png">
+<meta property="og:updated_time" content="2016-04-03T04:15:53.299Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="【原创】Linux学习系列-信号">
-<meta name="twitter:description" content="#信号的定义和分类信号是软件中断，提供了典型的异步机制。每个信号有一个编号，信号分为两类：非实时信号和实时信号。0-31编号属于非实时信号；31-63编号属于实时信号。为什么会分为这两类信号呢？这个主要是因为历史原因，首先实现的是非实时信号，非实时信号也成为不可靠信号，是因为其实现机制导致这类信号可能会丢失；而实时信号，由于存在排队机制，所以不会丢失。关于这点会在信号的处理过程图示中详细阐述。
-#">
+<meta name="twitter:title" content="【原创】Spymemcached操作队列分析">
+<meta name="twitter:description" content="Spymemcached是一个Memcached（一个高性能内存对象缓存系统）的开源客户端程序。其他MC客户端还有xmemcached、Memcached Client for Java等。我们使用MC客户端程序与MC服务端通信，实现set、get缓存的操作，MC支持的协议类型包括：ASCII 文本协议和二进制协议。
+Spymemcached使用Java NIO来实现，并且是单线程的，也就是说在S">
 
     
     <link rel="alternative" href="/atom.xml" title="Ma Haijin" type="application/atom+xml">
@@ -84,14 +84,14 @@
 		<header class="article-info clearfix">
   <h1 itemprop="name">
     
-      <a href="/2015/01/11/Linux学习系列-信号/" title="【原创】Linux学习系列-信号" itemprop="url">【原创】Linux学习系列-信号</a>
+      <a href="/2015/04/07/Spymemcached操作队列分析/" title="【原创】Spymemcached操作队列分析" itemprop="url">【原创】Spymemcached操作队列分析</a>
   </h1>
   <p class="article-author">By
        
 		<a href="/about" title="马海金" target="_blank" itemprop="author">马海金</a>
 		
   <p class="article-time">
-    <time datetime="2015-01-11T02:47:00.000Z" itemprop="datePublished"> 發表於 2015-01-11</time>
+    <time datetime="2015-04-07T13:50:00.000Z" itemprop="datePublished"> 發表於 2015-04-07</time>
     
   </p>
 </header>
@@ -104,18 +104,18 @@
 		
 		</div>
 		
-		<p>#信号的定义和分类<br>信号是软件中断，提供了典型的异步机制。每个信号有一个编号，信号分为两类：非实时信号和实时信号。0-31编号属于非实时信号；31-63编号属于实时信号。为什么会分为这两类信号呢？这个主要是因为历史原因，首先实现的是非实时信号，非实时信号也成为不可靠信号，是因为其实现机制导致这类信号可能会丢失；而实时信号，由于存在排队机制，所以不会丢失。关于这点会在信号的处理过程图示中详细阐述。</p>
-<p>#信号的来源<br>信号事件的发生有两个来源：硬件来源(比如我们按下了键盘或者其它硬件故障)；软件来源，最常用发送信号的系统函数是kill, raise, alarm和setitimer以及sigqueue函数，软件来源还包括一些非法运算等操作。</p>
-<p>#信号的处理时机<br>每个信号都可以被关联1个信号处理函数，如果没有关联，其处理动作是系统默认的，大部分都是动作都是忽略，具体每个信号的默认处理动作可以谷歌查询。在目标进程执行过程中，会检测是否有信号等待处理（每次从系统空间返回到用户空间时都做这样的检查），如果有，则调用信号处理函数。</p>
-<p>#信号的状态<br>实际执行信号的处理动作称为信号递达，信号从产生到递达之间的状态成为未决。进程既可以忽略信号，也可以阻塞信号。阻塞的意思是信号不会被递达，而忽略是信号递达之后的一个可选动作。信号在内核中的表示包括两个标记位：阻塞标记位和未决标记位以及信号处理函数的指针。</p>
-<p>#信号的处理过程</p>
+		<blockquote>
+<p>Spymemcached是一个Memcached（一个高性能内存对象缓存系统）的开源客户端程序。其他MC客户端还有xmemcached、Memcached Client for Java等。我们使用MC客户端程序与MC服务端通信，实现set、get缓存的操作，MC支持的协议类型包括：ASCII 文本协议和二进制协议。</p>
+<p>Spymemcached使用Java NIO来实现，并且是单线程的，也就是说在Spymemcached中只有一个主循环线程来处理各种IO事件（Connection、Read、Write）。对于业务线程来说，调用Spymemcached提供的API即可实现对服务端缓存的增、删、查、改操作，很是便利。处理业务线程操作的具体过程如下：</p>
 <ol>
-<li>如果存在未决信号等待处理且该信号没有被进程阻塞，则在运行相应的信号处理函数前，进程会把信号在未决信号链中占有的结构卸掉。是否将信号从进程未决信号集中删除对于实时与非实时信号是不同的。</li>
-<li>对于非实时信号来说，由于在未决信号信息链中最多只占用一个sigqueue结构，因此该结构被释放后，应该把信号在进程未决信号集中删除（信号注销完毕）。</li>
-<li>对于实时信号来说，可能在未决信号信息链中占用多个sigqueue结构，因此应该针对占用sigqueue结构的数目区别对待：如果只占用一个sigqueue结构（进程只收到该信号一次），则应该把信号在进程的未决信号集中删除（信号注销完毕）。否则，不应该在进程的未决信号集中删除该信号（信号注销完毕）。</li>
+<li>Spymemcached将每一个业务线程的操作都封装为一个Operation对象，然后放入内部的inputQueue队列中。</li>
+<li>在放入inputQueue的时候，调用selector.wakup()方法唤醒内部IO线程。</li>
+<li>IO线程被唤醒后，会将inputQueue中所有的Operation拷贝到writeQueue中去，并且会立马对writeQueue中的Operation做IO写操作，而且会注册读事件，如果必要（还有可写的Operation或者写buf中还有数据）还会注册写事件。</li>
+<li>一旦MC服务端有数据返回，就会触发读事件，然后客户端就会返回缓存对象给业务线程。</li>
 </ol>
-<p>下图就是我理解的信号处理过程：</p>
-<p><img src="http://7xj5jf.com1.z0.glb.clouddn.com/信号处理机制-1.png" alt=""></p>
+<p>下图描述了上述过程：</p>
+</blockquote>
+<p><img src="http://7xj5jf.com1.z0.glb.clouddn.com/Spymemcached.png" alt=""></p>
   
 	</div>
 		<footer class="article-footer clearfix">
@@ -123,13 +123,13 @@
 
 <div class="article-categories">
   <span></span>
-  <a class="article-category-link" href="/categories/Linux/">Linux</a>
+  <a class="article-category-link" href="/categories/缓存实现/">缓存实现</a>
 </div>
 
 
   <div class="article-tags">
   
-  <span></span> <a href="/tags/Linux/">Linux</a><a href="/tags/信号/">信号</a>
+  <span></span> <a href="/tags/memcached/">memcached</a>
   </div>
 
 </div>
@@ -138,7 +138,7 @@
 
 	<div class="article-share" id="share">
 	
-	  <div data-url="http://yoursite.com/2015/01/11/Linux学习系列-信号/" data-title="【原创】Linux学习系列-信号 | Ma Haijin" data-tsina="null" class="share clearfix">
+	  <div data-url="http://yoursite.com/2015/04/07/Spymemcached操作队列分析/" data-title="【原创】Spymemcached操作队列分析 | Ma Haijin" data-tsina="null" class="share clearfix">
 	  </div>
 	
 	</div>
@@ -152,18 +152,18 @@
 <nav class="article-nav clearfix">
  
  <div class="prev" >
- <a href="/2015/01/19/Linux学习系列-轮询函数/" title="【原创】Linux学习系列-轮询函数">
+ <a href="/2015/04/17/基于Netty的“请求-响应”同步通信机制实现/" title="【原创】基于Netty的“请求-响应”同步通信机制实现">
   <strong>上一篇：</strong><br/>
   <span>
-  【原创】Linux学习系列-轮询函数</span>
+  【原创】基于Netty的“请求-响应”同步通信机制实现</span>
 </a>
 </div>
 
 
 <div class="next">
-<a href="/2015/01/11/Linux学习系列-进程间通信/"  title="【原创】Linux学习系列-进程间通信">
+<a href="/2015/03/20/零拷贝概念详解/"  title="【原创】零拷贝概念详解">
  <strong>下一篇：</strong><br/> 
- <span>【原创】Linux学习系列-进程间通信
+ <span>【原创】零拷贝概念详解
 </span>
 </a>
 </div>

@@ -81,14 +81,14 @@
         <header class="article-info clearfix">
   <h1 itemprop="name">
     
-      <a href="/2016/04/03/消息中间件主备方案选型实践/" title="【原创】消息中间件主备方案选型实践" itemprop="url">【原创】消息中间件主备方案选型实践</a>
+      <a href="/2015/10/29/消息中间件主备方案选型实践/" title="【原创】消息中间件主备方案选型实践" itemprop="url">【原创】消息中间件主备方案选型实践</a>
   </h1>
   <p class="article-author">By
        
 		<a href="/about" title="马海金" target="_blank" itemprop="author">马海金</a>
 		
   <p class="article-time">
-    <time datetime="2016-04-03T03:47:55.759Z" itemprop="datePublished"> 發表於 2016-04-03</time>
+    <time datetime="2015-10-29T08:32:00.000Z" itemprop="datePublished"> 發表於 2015-10-29</time>
     
   </p>
 </header>
@@ -200,10 +200,16 @@
 </header>
     <div class="article-content">
         
-        <p>##测试环境<br>应用结构：<br>JWS+2次库表写入+分库分表<br>目标：TPS=5000<br>测试工具：Jmeter、Sysbench<br>并发线程：16</p>
-<p>##性能目标<br>TPS&gt;=5000</p>
-<p>##现状<br>采用Jmeter在16并发场景下测试2分钟，最终并发在1200-1300之间，距离性能目标比较遥远。</p>
-<p>##优化过程</p>
+        <h2 id="u6D4B_u8BD5_u73AF_u5883"><a href="#u6D4B_u8BD5_u73AF_u5883" class="headerlink" title="测试环境"></a>测试环境</h2><blockquote>
+<p>应用结构：<br>JWS+2次库表写入+分库分表<br>目标：TPS=5000<br>测试工具：Jmeter、Sysbench<br>并发线程：16</p>
+</blockquote>
+<h2 id="u6027_u80FD_u76EE_u6807"><a href="#u6027_u80FD_u76EE_u6807" class="headerlink" title="性能目标"></a>性能目标</h2><blockquote>
+<p>TPS&gt;=5000</p>
+</blockquote>
+<h2 id="u73B0_u72B6"><a href="#u73B0_u72B6" class="headerlink" title="现状"></a>现状</h2><blockquote>
+<p>采用Jmeter在16并发场景下测试2分钟，最终并发在1200-1300之间，距离性能目标比较遥远。</p>
+</blockquote>
+<h2 id="u4F18_u5316_u8FC7_u7A0B"><a href="#u4F18_u5316_u8FC7_u7A0B" class="headerlink" title="优化过程"></a>优化过程</h2><blockquote>
 <ol>
 <li>首先考虑可能是代码某个地方有问题，暂时没有考虑数据库，因为根据经验不应该这么低。所以，开始反复注释怀疑代码（不包括访问数据库的代码），但实际测试发现数据并无任何改变。</li>
 <li>开始怀疑可能是数据库插入操作比较耗时。注释数据库插入代码后，发现TPS明显提升至14000左右，因此可以断定瓶颈是在数据库插入造作。</li>
@@ -213,7 +219,8 @@
 <li>应用每次调用会做两次数据库插入操作，因此按照3100换算后，可以推算出应用的TPS不会高于1500，和测试情况相符。向DBA询问线上MySQL的写入性能数据为5000，则推算线上应用TPS应低于2500，依然无法达标。</li>
 <li>采用异步队列+批量插入的方式，最终将TPS提升到8000以上。</li>
 </ol>
-<p>##优化方案</p>
+</blockquote>
+<h2 id="u4F18_u5316_u65B9_u6848"><a href="#u4F18_u5316_u65B9_u6848" class="headerlink" title="优化方案"></a>优化方案</h2><blockquote>
 <ol>
 <li>应用内部构建异步队列，用于存储请求消息。所有的请求，提交到异步队列即立刻返回。</li>
 <li>构建调度线程，调度频率为100毫秒；调度线程负责计算每个工作线程需要处理的请求消息数，并提交工作任务到工作线程池，并同步等待其完成。</li>
@@ -221,6 +228,7 @@
 <li>每条工作线程根据其要处理的请求消息数，决定批量进行Insert操作的数量，而不是一个请求Insert一次。</li>
 </ol>
 <p>注：MySQL插入性能优化可参见：<a href="http://tech.uc.cn/?p=634" target="_blank" rel="external">http://tech.uc.cn/?p=634</a></p>
+</blockquote>
 
         
         

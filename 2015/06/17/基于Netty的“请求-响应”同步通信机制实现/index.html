@@ -12,27 +12,30 @@
 
     
     <meta name="description" content="需求描述实现基于Netty的“请求-响应”同步通信机制。
-设计思路Netty提供了异步IO和同步IO的统一实现，但是我们的需求其实和IO的同步异步并无关系。我们的关键是要实现请求-响应这种典型的一问一答交互方式。要实现这个需求，需要解决两个问题：
+设计思路
+Netty提供了异步IO和同步IO的统一实现，但是我们的需求其实和IO的同步异步并无关系。我们的关键是要实现请求-响应这种典型的一问一答交互方式。要实现这个需求，需要解决两个问题：
 
 请求和响应的正确匹配。
-当服务端返回响应结果的时候，怎么和客户端的请求正确匹配起来呢？解决方式：通过客户端唯一的RequestId，服务端返回的响应中">
+当服务端返回响应结果的时候，怎么和客户端的请求正确匹配起来呢？解决方式：通过客户端唯一的RequestId，服务端返回的响应">
 <meta property="og:type" content="article">
 <meta property="og:title" content="【原创】基于Netty的“请求-响应”同步通信机制实现">
-<meta property="og:url" content="http://yoursite.com/2015/04/17/基于Netty的“请求-响应”同步通信机制实现/index.html">
+<meta property="og:url" content="http://yoursite.com/2015/06/17/基于Netty的“请求-响应”同步通信机制实现/index.html">
 <meta property="og:site_name" content="Ma Haijin">
 <meta property="og:description" content="需求描述实现基于Netty的“请求-响应”同步通信机制。
-设计思路Netty提供了异步IO和同步IO的统一实现，但是我们的需求其实和IO的同步异步并无关系。我们的关键是要实现请求-响应这种典型的一问一答交互方式。要实现这个需求，需要解决两个问题：
+设计思路
+Netty提供了异步IO和同步IO的统一实现，但是我们的需求其实和IO的同步异步并无关系。我们的关键是要实现请求-响应这种典型的一问一答交互方式。要实现这个需求，需要解决两个问题：
 
 请求和响应的正确匹配。
-当服务端返回响应结果的时候，怎么和客户端的请求正确匹配起来呢？解决方式：通过客户端唯一的RequestId，服务端返回的响应中">
-<meta property="og:updated_time" content="2015-05-26T14:11:34.000Z">
+当服务端返回响应结果的时候，怎么和客户端的请求正确匹配起来呢？解决方式：通过客户端唯一的RequestId，服务端返回的响应">
+<meta property="og:updated_time" content="2016-04-03T04:30:25.659Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="【原创】基于Netty的“请求-响应”同步通信机制实现">
 <meta name="twitter:description" content="需求描述实现基于Netty的“请求-响应”同步通信机制。
-设计思路Netty提供了异步IO和同步IO的统一实现，但是我们的需求其实和IO的同步异步并无关系。我们的关键是要实现请求-响应这种典型的一问一答交互方式。要实现这个需求，需要解决两个问题：
+设计思路
+Netty提供了异步IO和同步IO的统一实现，但是我们的需求其实和IO的同步异步并无关系。我们的关键是要实现请求-响应这种典型的一问一答交互方式。要实现这个需求，需要解决两个问题：
 
 请求和响应的正确匹配。
-当服务端返回响应结果的时候，怎么和客户端的请求正确匹配起来呢？解决方式：通过客户端唯一的RequestId，服务端返回的响应中">
+当服务端返回响应结果的时候，怎么和客户端的请求正确匹配起来呢？解决方式：通过客户端唯一的RequestId，服务端返回的响应">
 
     
     <link rel="alternative" href="/atom.xml" title="Ma Haijin" type="application/atom+xml">
@@ -92,14 +95,14 @@
 		<header class="article-info clearfix">
   <h1 itemprop="name">
     
-      <a href="/2015/04/17/基于Netty的“请求-响应”同步通信机制实现/" title="【原创】基于Netty的“请求-响应”同步通信机制实现" itemprop="url">【原创】基于Netty的“请求-响应”同步通信机制实现</a>
+      <a href="/2015/06/17/基于Netty的“请求-响应”同步通信机制实现/" title="【原创】基于Netty的“请求-响应”同步通信机制实现" itemprop="url">【原创】基于Netty的“请求-响应”同步通信机制实现</a>
   </h1>
   <p class="article-author">By
        
 		<a href="/about" title="马海金" target="_blank" itemprop="author">马海金</a>
 		
   <p class="article-time">
-    <time datetime="2015-04-17T03:25:00.000Z" itemprop="datePublished"> 發表於 2015-04-17</time>
+    <time datetime="2015-06-17T03:25:00.000Z" itemprop="datePublished"> 發表於 2015-06-17</time>
     
   </p>
 </header>
@@ -113,20 +116,23 @@
 		</div>
 		
 		<h2 id="u9700_u6C42_u63CF_u8FF0"><a href="#u9700_u6C42_u63CF_u8FF0" class="headerlink" title="需求描述"></a>需求描述</h2><p>实现基于Netty的“请求-响应”同步通信机制。</p>
-<h2 id="u8BBE_u8BA1_u601D_u8DEF"><a href="#u8BBE_u8BA1_u601D_u8DEF" class="headerlink" title="设计思路"></a>设计思路</h2><p>Netty提供了异步IO和同步IO的统一实现，但是我们的需求其实和IO的同步异步并无关系。我们的关键是要实现请求-响应这种典型的一问一答交互方式。要实现这个需求，需要解决两个问题：</p>
+<h2 id="u8BBE_u8BA1_u601D_u8DEF"><a href="#u8BBE_u8BA1_u601D_u8DEF" class="headerlink" title="设计思路"></a>设计思路</h2><blockquote>
+<p>Netty提供了异步IO和同步IO的统一实现，但是我们的需求其实和IO的同步异步并无关系。我们的关键是要实现请求-响应这种典型的一问一答交互方式。要实现这个需求，需要解决两个问题：</p>
 <ol>
 <li><p>请求和响应的正确匹配。</p>
 <pre><code>当服务端返回响应结果的时候，怎么和客户端的请求正确匹配起来呢？解决方式：通过客户端唯一的RequestId，服务端返回的响应中需要包含该RequestId，这样客户端就可以通过RequestId来正确匹配请求响应。
 </code></pre></li>
 <li><p>请求线程和响应线程的通信。</p>
 <pre><code>因为请求线程会在发出请求后，同步等待飞鸽服务端的返回。因此，就需要解决，Netty在接受到响应之后，怎么通知请求线程结果。
-
-解决方式是利用Java中的CountDownLatch类来实现同步Future。具体过程是：客户端发送请求后将&lt;请求ID，Future&gt;的键值对保存到一个全局的Map中，这时候用Future等待结果，挂住请求线程；当Netty收到服务端的响应后，响应线程根据请求ID寸全局Map中取出Future，然后设置响应结果到Future中。这个时候利用CountDownLatch的通知机制，通知请求线程。请求线程从Future中拿到响应结果，然后做业务处理。
-
-通过对以上两个问题的解决，又引出了一个新的问题：全局Map在并发较大，网络环境较差的情况下，有可能爆满。目前SDK通过一个定时任务，来定时清理该全局Map中超时的请求。
 </code></pre></li>
 </ol>
+</blockquote>
+<pre><code>解决方式是利用Java中的CountDownLatch类来实现同步Future。具体过程是：客户端发送请求后将&lt;请求ID，Future&gt;的键值对保存到一个全局的Map中，这时候用Future等待结果，挂住请求线程；当Netty收到服务端的响应后，响应线程根据请求ID寸全局Map中取出Future，然后设置响应结果到Future中。这个时候利用CountDownLatch的通知机制，通知请求线程。请求线程从Future中拿到响应结果，然后做业务处理。
+
+通过对以上两个问题的解决，又引出了一个新的问题：全局Map在并发较大，网络环境较差的情况下，有可能爆满。目前SDK通过一个定时任务，来定时清理该全局Map中超时的请求。
+</code></pre><blockquote>
 <p>同步Future的实现如下：<br> <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SyncFuture</span>&lt;<span class="title">T</span>&gt; <span class="keyword">implements</span> <span class="title">Future</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line">    <span class="comment">// 因为请求和响应是一一对应的，因此初始化CountDownLatch值为1。</span></span><br><span class="line">    <span class="keyword">private</span> CountDownLatch latch = <span class="keyword">new</span> CountDownLatch(<span class="number">1</span>);</span><br><span class="line">    <span class="comment">// 需要响应线程设置的响应结果</span></span><br><span class="line">    <span class="keyword">private</span> T response;</span><br><span class="line">    <span class="comment">// Futrue的请求时间，用于计算Future是否超时</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">long</span> beginTime = System.currentTimeMillis();</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">SyncFuture</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="annotation">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">cancel</span><span class="params">(<span class="keyword">boolean</span> mayInterruptIfRunning)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="annotation">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isCancelled</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="annotation">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isDone</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (response != <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 获取响应结果，直到有结果才返回。</span></span><br><span class="line">    <span class="annotation">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> T <span class="title">get</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        latch.await();</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.response;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 获取响应结果，直到有结果或者超过指定时间就返回。</span></span><br><span class="line">    <span class="annotation">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> T <span class="title">get</span><span class="params">(<span class="keyword">long</span> timeout, TimeUnit unit)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (latch.await(timeout, unit)) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">this</span>.response;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 用于设置响应结果，并且做countDown操作，通知请求线程</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setResponse</span><span class="params">(T response)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.response = response;</span><br><span class="line">        latch.countDown();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">long</span> <span class="title">getBeginTime</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> beginTime;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+</blockquote>
   
 	</div>
 		<footer class="article-footer clearfix">
@@ -149,7 +155,7 @@
 
 	<div class="article-share" id="share">
 	
-	  <div data-url="http://yoursite.com/2015/04/17/基于Netty的“请求-响应”同步通信机制实现/" data-title="【原创】基于Netty的“请求-响应”同步通信机制实现 | Ma Haijin" data-tsina="null" class="share clearfix">
+	  <div data-url="http://yoursite.com/2015/06/17/基于Netty的“请求-响应”同步通信机制实现/" data-title="【原创】基于Netty的“请求-响应”同步通信机制实现 | Ma Haijin" data-tsina="null" class="share clearfix">
 	  </div>
 	
 	</div>
@@ -163,18 +169,18 @@
 <nav class="article-nav clearfix">
  
  <div class="prev" >
- <a href="/2015/04/27/JVM的Heap Memory和Native Memory/" title="【原创】JVM的Heap Memory和Native Memory">
+ <a href="/2015/06/28/Netty中ChannelHandler共享数据的方式/" title="【原创】Netty中ChannelHandler共享数据的方式">
   <strong>上一篇：</strong><br/>
   <span>
-  【原创】JVM的Heap Memory和Native Memory</span>
+  【原创】Netty中ChannelHandler共享数据的方式</span>
 </a>
 </div>
 
 
 <div class="next">
-<a href="/2015/04/07/Spymemcached操作队列分析/"  title="【原创】Spymemcached操作队列分析">
+<a href="/2015/05/20/MySQL服务器性能优化/"  title="【原创】MySQL服务器性能优化">
  <strong>下一篇：</strong><br/> 
- <span>【原创】Spymemcached操作队列分析
+ <span>【原创】MySQL服务器性能优化
 </span>
 </a>
 </div>

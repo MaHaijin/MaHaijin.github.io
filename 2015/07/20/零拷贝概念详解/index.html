@@ -11,38 +11,47 @@
     
 
     
-    <meta name="description" content="概述零拷贝是我们经常听到的一个术语，要解释清楚这个术语，我个人觉得需要说明三个场景。
+    <meta name="description" content="概述
+零拷贝是我们经常听到的一个术语，要解释清楚这个术语，我个人觉得需要说明三个场景。
 
 Java中的DirectBuffer；
 Java中的transferTo，底层就是Linux的sendFile；
 Linux中的Direct IO；
 
 本系列分三篇来讲解。
-DirectBuffer的特点Java中的DirectBuffer的具体用法和API，此处不再赘述。我们主要理解DirectBuffer的">
+
+DirectBuffer的特点
+Java中的DirectBuffer的具体用法和API，此处不再赘述。我们主要理解DirectBuff">
 <meta property="og:type" content="article">
 <meta property="og:title" content="【原创】零拷贝概念详解">
-<meta property="og:url" content="http://yoursite.com/2015/03/20/零拷贝概念详解/index.html">
+<meta property="og:url" content="http://yoursite.com/2015/07/20/零拷贝概念详解/index.html">
 <meta property="og:site_name" content="Ma Haijin">
-<meta property="og:description" content="概述零拷贝是我们经常听到的一个术语，要解释清楚这个术语，我个人觉得需要说明三个场景。
+<meta property="og:description" content="概述
+零拷贝是我们经常听到的一个术语，要解释清楚这个术语，我个人觉得需要说明三个场景。
 
 Java中的DirectBuffer；
 Java中的transferTo，底层就是Linux的sendFile；
 Linux中的Direct IO；
 
 本系列分三篇来讲解。
-DirectBuffer的特点Java中的DirectBuffer的具体用法和API，此处不再赘述。我们主要理解DirectBuffer的">
+
+DirectBuffer的特点
+Java中的DirectBuffer的具体用法和API，此处不再赘述。我们主要理解DirectBuff">
 <meta property="og:image" content="http://7xj5jf.com1.z0.glb.clouddn.com/DirectBuffer_1.png">
-<meta property="og:updated_time" content="2015-06-15T02:31:21.000Z">
+<meta property="og:updated_time" content="2016-04-03T04:31:50.591Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="【原创】零拷贝概念详解">
-<meta name="twitter:description" content="概述零拷贝是我们经常听到的一个术语，要解释清楚这个术语，我个人觉得需要说明三个场景。
+<meta name="twitter:description" content="概述
+零拷贝是我们经常听到的一个术语，要解释清楚这个术语，我个人觉得需要说明三个场景。
 
 Java中的DirectBuffer；
 Java中的transferTo，底层就是Linux的sendFile；
 Linux中的Direct IO；
 
 本系列分三篇来讲解。
-DirectBuffer的特点Java中的DirectBuffer的具体用法和API，此处不再赘述。我们主要理解DirectBuffer的">
+
+DirectBuffer的特点
+Java中的DirectBuffer的具体用法和API，此处不再赘述。我们主要理解DirectBuff">
 
     
     <link rel="alternative" href="/atom.xml" title="Ma Haijin" type="application/atom+xml">
@@ -102,14 +111,14 @@ DirectBuffer的特点Java中的DirectBuffer的具体用法和API，此处不再�
 		<header class="article-info clearfix">
   <h1 itemprop="name">
     
-      <a href="/2015/03/20/零拷贝概念详解/" title="【原创】零拷贝概念详解" itemprop="url">【原创】零拷贝概念详解</a>
+      <a href="/2015/07/20/零拷贝概念详解/" title="【原创】零拷贝概念详解" itemprop="url">【原创】零拷贝概念详解</a>
   </h1>
   <p class="article-author">By
        
 		<a href="/about" title="马海金" target="_blank" itemprop="author">马海金</a>
 		
   <p class="article-time">
-    <time datetime="2015-03-20T13:46:00.000Z" itemprop="datePublished"> 發表於 2015-03-20</time>
+    <time datetime="2015-07-20T13:46:00.000Z" itemprop="datePublished"> 發表於 2015-07-20</time>
     
   </p>
 </header>
@@ -122,23 +131,31 @@ DirectBuffer的特点Java中的DirectBuffer的具体用法和API，此处不再�
 		
 		</div>
 		
-		<h2 id="u6982_u8FF0"><a href="#u6982_u8FF0" class="headerlink" title="概述"></a>概述</h2><p>零拷贝是我们经常听到的一个术语，要解释清楚这个术语，我个人觉得需要说明三个场景。</p>
+		<h2 id="u6982_u8FF0"><a href="#u6982_u8FF0" class="headerlink" title="概述"></a>概述</h2><blockquote>
+<p>零拷贝是我们经常听到的一个术语，要解释清楚这个术语，我个人觉得需要说明三个场景。</p>
 <ol>
 <li>Java中的DirectBuffer；</li>
 <li>Java中的transferTo，底层就是Linux的sendFile；</li>
 <li>Linux中的Direct IO；</li>
 </ol>
 <p>本系列分三篇来讲解。</p>
-<h2 id="DirectBuffer_u7684_u7279_u70B9"><a href="#DirectBuffer_u7684_u7279_u70B9" class="headerlink" title="DirectBuffer的特点"></a>DirectBuffer的特点</h2><p>Java中的DirectBuffer的具体用法和API，此处不再赘述。我们主要理解DirectBuffer的原理。</p>
+</blockquote>
+<h2 id="DirectBuffer_u7684_u7279_u70B9"><a href="#DirectBuffer_u7684_u7279_u70B9" class="headerlink" title="DirectBuffer的特点"></a>DirectBuffer的特点</h2><blockquote>
+<p>Java中的DirectBuffer的具体用法和API，此处不再赘述。我们主要理解DirectBuffer的原理。</p>
 <ol>
 <li>DirectBuffer是分配在JVM堆外的进程地址空间的，因此，相对于在JVM堆中分配的堆内Buffer，也叫做堆外Buffer。这个地方的堆外，从操作系统的角度讲其实就是JVM进程的地址空间，那么自然也就属于用户空间了，堆也属于JVM进程地址空间。为什么我们要强调用户空间呢？其实是后边的篇幅说明DirectBuffer的“零拷贝”意义。</li>
 <li>DirectBuffer其实是JVM本地代码经过malloc系统调用，在当前JVM进程的地址空间申请的一段内存空间。它的引用依然保存在JVM堆中，只是其存储空间在堆外而已。DirectBuffer的引用一般是直接在JVM堆中的老年代创建的，因此，其回收的时机只有在JVM进行Full GC时。基于这个回收特点，我们需要特别注意，不要频繁的分配大量的DirectBuffer，否则很容易导致内存溢出，而且这个时候的溢出，不是堆溢出，而是本地内存溢出。</li>
 </ol>
-<h2 id="DirectBuffer_u7684_u597D_u5904"><a href="#DirectBuffer_u7684_u597D_u5904" class="headerlink" title="DirectBuffer的好处"></a>DirectBuffer的好处</h2><p>DirectBuffer带来的性能的提升，其根本原因是节省了一次从堆内空间到堆外空间的Buffer拷贝，下图可以说明这个过程。其实省去的就是红线所示的从堆内存到本地内存的拷贝。</p>
+</blockquote>
+<h2 id="DirectBuffer_u7684_u597D_u5904"><a href="#DirectBuffer_u7684_u597D_u5904" class="headerlink" title="DirectBuffer的好处"></a>DirectBuffer的好处</h2><blockquote>
+<p>DirectBuffer带来的性能的提升，其根本原因是节省了一次从堆内空间到堆外空间的Buffer拷贝，下图可以说明这个过程。其实省去的就是红线所示的从堆内存到本地内存的拷贝。</p>
+</blockquote>
 <p><img src="http://7xj5jf.com1.z0.glb.clouddn.com/DirectBuffer_1.png" alt=""></p>
 <p>##sendFile</p>
+<blockquote>
 <p>待补充……</p>
 <p>##DirectIO<br>待补充……</p>
+</blockquote>
   
 	</div>
 		<footer class="article-footer clearfix">
@@ -161,7 +178,7 @@ DirectBuffer的特点Java中的DirectBuffer的具体用法和API，此处不再�
 
 	<div class="article-share" id="share">
 	
-	  <div data-url="http://yoursite.com/2015/03/20/零拷贝概念详解/" data-title="【原创】零拷贝概念详解 | Ma Haijin" data-tsina="null" class="share clearfix">
+	  <div data-url="http://yoursite.com/2015/07/20/零拷贝概念详解/" data-title="【原创】零拷贝概念详解 | Ma Haijin" data-tsina="null" class="share clearfix">
 	  </div>
 	
 	</div>
@@ -175,18 +192,18 @@ DirectBuffer的特点Java中的DirectBuffer的具体用法和API，此处不再�
 <nav class="article-nav clearfix">
  
  <div class="prev" >
- <a href="/2015/04/07/Spymemcached操作队列分析/" title="【原创】Spymemcached操作队列分析">
+ <a href="/2015/08/26/TCP协议Nagle算法和Delayed ACK相互影响实例分析/" title="【原创】TCP协议Nagle算法和Delayed ACK相互影响实例分析">
   <strong>上一篇：</strong><br/>
   <span>
-  【原创】Spymemcached操作队列分析</span>
+  【原创】TCP协议Nagle算法和Delayed ACK相互影响实例分析</span>
 </a>
 </div>
 
 
 <div class="next">
-<a href="/2015/03/20/c3p0超时机制分析/"  title="【原创】C3P0连接超时分析">
+<a href="/2015/07/08/从无到有：软件项目过程实践/"  title="【原创】从无到有：软件项目过程敏捷实践">
  <strong>下一篇：</strong><br/> 
- <span>【原创】C3P0连接超时分析
+ <span>【原创】从无到有：软件项目过程敏捷实践
 </span>
 </a>
 </div>

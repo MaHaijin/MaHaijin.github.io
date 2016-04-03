@@ -288,15 +288,16 @@
 </header>
     <div class="article-content">
         
-        <p>无论是分析问题还是学习知识，都是有规律可循的，遵循这个规律会事半功倍。这个规律，我们就可以称之为方法论。总结起来就是三个关键词：What、How、Why。但是二者不同之处在于三个关键点的组织顺序不一样。</p>
+        <blockquote>
+<p>无论是分析问题还是学习知识，都是有规律可循的，遵循这个规律会事半功倍。这个规律，我们就可以称之为方法论。总结起来就是三个关键词：What、How、Why。但是二者不同之处在于三个关键点的组织顺序不一样。</p>
+</blockquote>
 <h2 id="u5206_u6790_u95EE_u9898"><a href="#u5206_u6790_u95EE_u9898" class="headerlink" title="分析问题"></a>分析问题</h2><blockquote>
 <p>方法论：Why -&gt; What -&gt; How</p>
-</blockquote>
 <p>举例来说，现在我们要解决这样一个问题（需求）：设计一个消息中间件的主备方案。</p>
 <p>问题很明确，但是我们要怎么快速、清晰的分析，并最终解决这个问题呢？让我们根据方法论来一步一步分析。</p>
 <ol>
 <li><p>Why</p>
-<p>我们为什么要做主备方案呢？因为想避免在A主机宕机的场景下，客户端程序依然可以正常的发布和拉取消息。其实Why很简单，但是其却很重要。不分析清楚Why，就失去了驱动力；没有驱动力，你的上级会提供资源支持你解决这个问题吗？下级能够更合理的设计和开发吗？显然不能！</p>
+<p>  我们为什么要做主备方案呢？因为想避免在A主机宕机的场景下，客户端程序依然可以正常的发布和拉取消息。其实Why很简单，但是其却很重要。不分析清楚Why，就失去了驱动力；没有驱动力，你的上级会提供资源支持你解决这个问题吗？下级能够更合理的设计和开发吗？显然不能！</p>
 </li>
 <li><p>What</p>
 <p>主备方案是为了提升应用的高可用。可是这是比较笼统的一个目标，并不是很清晰，比如究竟要达到什么程度的高可用呢？是要所有功能都要高可用？还是某些功能高可用？确定了这些细节，那么我们就搞清楚了What，也就是我们最终会把这个问题解决到什么程度？是全部解决？还是部分解决？总结起来What的关键如下：</p>
@@ -314,9 +315,9 @@
 </code></pre><p>具体到每一个核心问题究竟要怎么解决？采用什么技术解决？这些都是How要解决的问题。关于主备方案的详细设计过程，参见博文：</p>
 </li>
 </ol>
+</blockquote>
 <h2 id="u5B66_u4E60_u77E5_u8BC6"><a href="#u5B66_u4E60_u77E5_u8BC6" class="headerlink" title="学习知识"></a>学习知识</h2><blockquote>
 <p>方法论：What -&gt; How -&gt; Why</p>
-</blockquote>
 <p>人类学习一个技能或者一个知识，总是遵循由浅入深的规律，What -&gt; How -&gt; Why。下边拿我们学习Spring框架的来说。</p>
 <ol>
 <li><p>What</p>
@@ -329,6 +330,7 @@
 <p>Spring为什么要采用依赖注入？为什么要采用插件式设计？为什么要配置优先？更深一点，为什么某段代码是这么设计？知道了这些，那么你就可以说：我精通Spring，甚至可以编写类似的MVC框架。</p>
 </li>
 </ol>
+</blockquote>
 
         
         
@@ -375,50 +377,48 @@
         <header class="article-info clearfix">
   <h1 itemprop="name">
     
-      <a href="/2015/05/28/Netty中ChannelHandler共享数据的方式/" title="【原创】Netty中ChannelHandler共享数据的方式" itemprop="url">【原创】Netty中ChannelHandler共享数据的方式</a>
+      <a href="/2015/08/26/TCP协议Nagle算法和Delayed ACK相互影响实例分析/" title="【原创】TCP协议Nagle算法和Delayed ACK相互影响实例分析" itemprop="url">【原创】TCP协议Nagle算法和Delayed ACK相互影响实例分析</a>
   </h1>
   <p class="article-author">By
        
 		<a href="/about" title="马海金" target="_blank" itemprop="author">马海金</a>
 		
   <p class="article-time">
-    <time datetime="2015-05-28T14:50:00.000Z" itemprop="datePublished"> 發表於 2015-05-28</time>
+    <time datetime="2015-08-26T13:50:00.000Z" itemprop="datePublished"> 發表於 2015-08-26</time>
     
   </p>
 </header>
     <div class="article-content">
         
-        <p>##（一）成员变量<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DataServerHandler</span> <span class="keyword">extends</span> <span class="title">SimpleChannelHandler</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 成员变量</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">boolean</span> loggedIn;</span><br><span class="line"> </span><br><span class="line">    <span class="annotation">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">messageReceived</span><span class="params">(ChannelHandlerContext ctx, MessageEvent e)</span> </span>&#123;</span><br><span class="line">        ...</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<ul>
-<li>如果只是想在当前连接内共享数据，那么需要针对不同的Channel创建不同的ChannelHandler实例，避免共享范围扩大至所有连接。</li>
-</ul>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 所有Channel共用一个ChannelHandler实例 </span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DataServerPipelineFactory</span> <span class="keyword">implements</span> <span class="title">ChannelPipelineFactory</span> </span>&#123;</span><br><span class="line"> </span><br><span class="line">     <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> DataServerHandler SHARED = <span class="keyword">new</span> DataServerHandler();</span><br><span class="line"> </span><br><span class="line">     <span class="function"><span class="keyword">public</span> ChannelPipeline <span class="title">getPipeline</span><span class="params">()</span> </span>&#123;</span><br><span class="line">         <span class="keyword">return</span> Channels.pipeline(SHARED);</span><br><span class="line">     &#125;</span><br><span class="line"> &#125;</span><br><span class="line"><span class="comment">// 每一个Channel创建一个ChannelHandler实例</span></span><br><span class="line">bootstrap.setPipelineFactory(<span class="keyword">new</span> ChannelPipelineFactory() &#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> ChannelPipeline <span class="title">getPipeline</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        ChannelPipeline pipeline = pipeline();      </span><br><span class="line">        pipeline.addLast(<span class="string">"handler"</span>, <span class="keyword">new</span> TestHandler());</span><br><span class="line">        <span class="keyword">return</span> pipeline;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
-<p>##（二）ChannelHandlerContext</p>
-<ul>
-<li>ChannelHandlerContext是在Pipline注册ChannelHandler的时候和其绑定的，因此一个被多次注册（无论是否是同一个Pipline）的ChannelHandler会同时拥有多个ChannelHandlerContext。</li>
-<li>对于ChannelHandlerContext一个常见的误解是以为其可以在同一个Pipline的各个Handler之间传递数据。如果真要这样做，应该使用MessageEvent或者ChannelLocal。</li>
-</ul>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="annotation">@Sharable</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DataServerHandler</span> <span class="keyword">extends</span> <span class="title">SimpleChannelHandler</span> </span>&#123;</span><br><span class="line"> </span><br><span class="line">    <span class="annotation">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">messageReceived</span><span class="params">(ChannelHandlerContext ctx, MessageEvent e)</span> </span>&#123;</span><br><span class="line">        Channel ch = e.getChannel();</span><br><span class="line">        Object o = e.getMessage();</span><br><span class="line">        <span class="keyword">if</span> (o <span class="keyword">instanceof</span> LoginMessage) &#123;</span><br><span class="line">            authenticate((LoginMessage) o);</span><br><span class="line">            <span class="comment">// 设置共享数据</span></span><br><span class="line">            ctx.setAttachment(<span class="keyword">true</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<ul>
-<li>@Sharable注解只是起到一个标示的作用，说明一个该ChannelHandler实例可以被多次注册到一个或者多个Pipline中，而且不会导致不同的Channel共享数据出现竞争条件。</li>
-<li>基于ChannelHandlerContext同ChannelHandler的绑定时机和机制，很容易理解在本例中是怎么保证@Sharable的。</li>
-</ul>
-<p>##（三）Channel</p>
-<ul>
-<li>该方法类似ChannelLocal，只是共享数据是直接存储在Channel实例中的。</li>
-</ul>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="annotation">@Sharable</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TestHandler</span> <span class="keyword">extends</span> <span class="title">SimpleChannelHandler</span> </span>&#123;</span><br><span class="line">    <span class="annotation">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">messageReceived</span><span class="params">(ChannelHandlerContext ctx, MessageEvent event)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="comment">// 通过任意一种方式获取到当前Channel，然后设置共享数据</span></span><br><span class="line">        ctx.getChannel().setAttachment(<span class="keyword">true</span>);</span><br><span class="line">        event.getChannel().setAttachment(<span class="keyword">true</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<ul>
-<li>很明显，本例中的ChannelLocal也是符合@Sharable要求的。</li>
-</ul>
-<p>##（四）ChannelLocal</p>
-<ul>
-<li>如果想在当前连接的其他ChannelHandler或者外部Handler中共享数据，则可以使用ChannelLocal。其设计思想类似于JDK中的ThreadLocal，其内部是一个Channel做Key，共享数据做Value的结构。</li>
-</ul>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">DataServerState</span> </span>&#123;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> ChannelLocal&lt;Boolean&gt; loggedIn = <span class="keyword">new</span> ChannelLocal&lt;&gt;() &#123;</span><br><span class="line">        <span class="function"><span class="keyword">protected</span> Boolean <span class="title">initialValue</span><span class="params">(Channel channel)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line"><span class="annotation">@Sharable</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DataServerHandler</span> <span class="keyword">extends</span> <span class="title">SimpleChannelHandler</span> </span>&#123;</span><br><span class="line"> </span><br><span class="line">    <span class="annotation">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">messageReceived</span><span class="params">(ChannelHandlerContext ctx, MessageEvent e)</span> </span>&#123;</span><br><span class="line">        Channel ch = e.getChannel();</span><br><span class="line">        Object o = e.getMessage();</span><br><span class="line">        <span class="keyword">if</span> (o <span class="keyword">instanceof</span> LoginMessage) &#123;</span><br><span class="line">            authenticate((LoginMessage) o);</span><br><span class="line">            <span class="comment">// 设置共享数据</span></span><br><span class="line">            DataServerState.loggedIn.set(ch, <span class="keyword">true</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<ul>
-<li>很明显，本例中的ChannelLocal也是符合@Sharable要求的。</li>
-</ul>
+        <blockquote>
+<p><em>建议：阅读本文之前，最好对于TCP的发送、重发以及ACK机制有所了解。</em></p>
+<h2 id="u95EE_u9898_u63CF_u8FF0"><a href="#u95EE_u9898_u63CF_u8FF0" class="headerlink" title="问题描述"></a>问题描述</h2><p>最近在一个消息中间件系统（该消息中间件由客户端SDK和服务端Server组成）的性能测试时，发现每个请求的响应时间大概在40ms-50ms之间，这明显过大了。最终定位，是因为SDK没有禁用TCP的Nagle算法导致的。但其根本原理是因为TCP的Delayed Ack机制和Nagle Algorithm相互影响导致的。</p>
+</blockquote>
+<h2 id="u6982_u5FF5_u8BE6_u89E3"><a href="#u6982_u5FF5_u8BE6_u89E3" class="headerlink" title="概念详解"></a>概念详解</h2><blockquote>
+<p><strong>TCP-Delayed Ack</strong><br>目的：用于防止只发送一个单独的Ack包，而是希望发送的包是一个Ack+一份数据组成一个包，这样能较少交互次数，减少网络资源消耗。这个设定是基于对于一般交互场景的一个基本假设：数据接收方会生成一个响应给数据发送方。<br>原理：当数据接收方收到一个TCP包之后，先不回应ACK包，而是等待一定的时间（本例中是40ms），直到</p>
+<ol>
+<li>数据接收方发送一份响应数据<br>当数据接收方，收到足够的数据，进行业务处理后，一般会返回业务响应，这时会立即返回：业务响应+ACK。</li>
+<li>接收到连续的TCP包<br>当服务接收端接收到1号TCP包后，会先延迟发送1号包的ACK，等待2号包到来，2号包到达时，则立即返回一次ACK；当3号包到来时，会延迟3号包的ACK，等待4号包到来，4号包到达时，则立即返回一次ACK……<br>那么，这样就造成偶数序号的TCP包到达的时候，就会立即返回一次ACK；而奇数序号的包到达时，则延迟ACK响应，等待后续的偶数包到来。</li>
+<li>超时<br>超过40ms。</li>
+</ol>
+<p><strong>TCP-Nagle Algorithm</strong><br>目的：用于防止发送大量的小包，降低网络资源消耗。<br>原理：当数据发送方写入TCP缓冲区的数据小于MSS（最大报文长度），则暂不发送，等待写入的数据达到MSS再发送；除非在等待的过程中，发送端发送出去的所有TCP报文均已被ACK，这样就可以不用等待写入数据达到MSS，直接发送出去了。我们称没有达到MSS的报文为小包的话，那么其实TCP-Nagle Algorithm就保证了一个连接在一个时刻，有且只能有一个没有被确认的小包。<br>关于以上两点，可以参考这篇文章，介绍的很详细：<a href="http://www.stuartcheshire.org/papers/NagleDelayedAck/" target="_blank" rel="external">http://www.stuartcheshire.org/papers/NagleDelayedAck/</a></p>
+</blockquote>
+<h2 id="u8FC7_u7A0B_u5206_u6790"><a href="#u8FC7_u7A0B_u5206_u6790" class="headerlink" title="过程分析"></a>过程分析</h2><blockquote>
+<p>该消息中间件系统在做性能测试时，SDK没有禁用Nagle算法，而Server端禁用了；测试时的消息长度为消息头（12）+消息体（14）Byte，TCP MSS是1460Byte；服务端和SDK交互采用类似TCP三次握手的确认机制来保证高可靠性。那么考虑如下过程：</p>
+<ol>
+<li>SDK端发送第一条消息，写入了TCP Buffer，虽然未达到MSS，但是因为没有需要确认的包，所以会立即发送；</li>
+<li>Server端收到TCP包后，就延迟ACK响应；同时SDK端由于启用了Nagle算法，并且存在没有ACK的包，因此处于等待中；</li>
+<li>Server端业务层解包进行业务处理，处理完成后，立即发送业务响应，并捎带ACK返回给SDK；</li>
+<li>SDK端收到了Server端返回的响应和ACK后，立即回复业务确认消息，并捎带ACK；</li>
+<li>由于Server端收到业务确认消息后，不用再返回响应给SDK，因此延迟ACK确认；</li>
+<li>SDK端发送第二条消息，但是因为启用了Nagle算法，所以必须等待ACK。直到第5步的延迟确认到达，则立即发送第二条消息。</li>
+</ol>
+<p>Tcpdump抓包如下：<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">2015-05-25 18:42:49.736897 IP 100.84.52.90.58237 &#62; 100.84.73.45.9090: P 71:101(30) ack 20 win 16420&#10;E..FU3@.=..OdT4ZdTI-.&#125;#...(.R.mpP.@$.).......)....&#10;queueAThis is test &#10;2015-05-25 18:42:49.737763 IP 100.84.73.45.9090 &#62; 100.84.52.90.58237: P 20:39(19) ack 101 win 46&#10;E..;Fn@.@...dTI-dT4Z#..&#125;R.mp..)&#9;P...F].......*......SUCCESS&#10;2015-05-25 18:42:49.744738 IP 100.84.52.90.58237 &#62; 100.84.73.45.9090: P 101:113(12) ack 39 win 16415&#10;E..4U4@.=..`dT4ZdTI-.&#125;#...)&#9;R.m.P.@.d........4......&#10;2015-05-25 18:42:49.784810 IP 100.84.73.45.9090 &#62; 100.84.52.90.58237: . ack 113 win 46&#10;E..(Fo@.@..1dTI-dT4Z#..&#125;R.m...).P.......&#10;2015-05-25 18:42:49.785438 IP 100.84.52.90.58237 &#62; 100.84.73.45.9090: P 113:143(30) ack 39 win 16415&#10;E..FU5@.=..MdT4ZdTI-.&#125;#...).R.m.P.@..........)....&#10;queueAThis is test &#10;2015-05-25 18:42:49.785450 IP 100.84.73.45.9090 &#62; 100.84.52.90.58237: . ack 143 win 46&#10;E..(Fp@.@..0dTI-dT4Z#..&#125;R.m...)3P.......&#10;2015-05-25 18:42:49.786147 IP 100.84.73.45.9090 &#62; 100.84.52.90.58237: P 39:58(19) ack 143 win 46&#10;E..;Fq@.@...dTI-dT4Z#..&#125;R.m...)3P...F].......*......SUCCESS&#10;2015-05-25 18:42:49.790470 IP 100.84.52.90.58237 &#62; 100.84.73.45.9090: P 143:173(30) ack 58 win 16410&#10;E..(Fo@.@..1dTI-dT4Z#..&#125;R.m...).P.......</span><br></pre></td></tr></table></figure></p>
+<p><strong>总结：通过以上过程可以发现，由于第5步的延迟ACK，导致SDK发送消息延迟，最终导致了性能下降。如果SDK端关闭的Nagle算法，SDK就可以立即发送第二条消息，而不会受到Nagle算法的约束，一直等待第5步的ACK到达。</strong></p>
+</blockquote>
+<h2 id="u4EE3_u7801_u8BF4_u660E"><a href="#u4EE3_u7801_u8BF4_u660E" class="headerlink" title="代码说明"></a>代码说明</h2><blockquote>
+<p>在Netty中，可以通过设置tcpNoDelay选项，开启或者禁用Nagle算法。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 用来禁用TCP的Nagle算法。</span></span><br><span class="line">bootstrap.setOption(<span class="string">"tcpNoDelay"</span>, <span class="keyword">true</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// Netty底层其实就是使用JDK中的Socket.class的setTcpNoDelay方法来设置。</span></span><br><span class="line"><span class="comment">/**</span><br><span class="line">* Enable/disable TCP_NODELAY (disable/enable Nagle's algorithm).</span><br><span class="line">*/</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setTcpNoDelay</span><span class="params">(<span class="keyword">boolean</span> on)</span> <span class="keyword">throws</span> SocketException</span>;</span><br></pre></td></tr></table></figure></p>
+</blockquote>
 
         
         
@@ -431,13 +431,13 @@
 
 <div class="article-categories">
   <span></span>
-  <a class="article-category-link" href="/categories/并发编程/">并发编程</a>
+  <a class="article-category-link" href="/categories/协议/">协议</a>
 </div>
 
 
   <div class="article-tags">
   
-  <span></span> <a href="/tags/Netty/">Netty</a>
+  <span></span> <a href="/tags/Netty/">Netty</a><a href="/tags/TCP/">TCP</a>
   </div>
 
 </div>
@@ -465,48 +465,44 @@
         <header class="article-info clearfix">
   <h1 itemprop="name">
     
-      <a href="/2015/05/26/TCP协议Nagle算法和Delayed ACK相互影响实例分析/" title="【原创】TCP协议Nagle算法和Delayed ACK相互影响实例分析" itemprop="url">【原创】TCP协议Nagle算法和Delayed ACK相互影响实例分析</a>
+      <a href="/2015/07/20/零拷贝概念详解/" title="【原创】零拷贝概念详解" itemprop="url">【原创】零拷贝概念详解</a>
   </h1>
   <p class="article-author">By
        
 		<a href="/about" title="马海金" target="_blank" itemprop="author">马海金</a>
 		
   <p class="article-time">
-    <time datetime="2015-05-26T13:50:00.000Z" itemprop="datePublished"> 發表於 2015-05-26</time>
+    <time datetime="2015-07-20T13:46:00.000Z" itemprop="datePublished"> 發表於 2015-07-20</time>
     
   </p>
 </header>
     <div class="article-content">
         
-        <p><em>建议：阅读本文之前，最好对于TCP的发送、重发以及ACK机制有所了解。</em></p>
-<p>##问题描述<br>最近在一个消息中间件系统（该消息中间件由客户端SDK和服务端Server组成）的性能测试时，发现每个请求的响应时间大概在40ms-50ms之间，这明显过大了。最终定位，是因为SDK没有禁用TCP的Nagle算法导致的。但其根本原理是因为TCP的Delayed Ack机制和Nagle Algorithm相互影响导致的。</p>
-<p>##概念详解<br><strong>TCP-Delayed Ack</strong></p>
-<blockquote>
-<p>目的：用于防止只发送一个单独的Ack包，而是希望发送的包是一个Ack+一份数据组成一个包，这样能较少交互次数，减少网络资源消耗。这个设定是基于对于一般交互场景的一个基本假设：数据接收方会生成一个响应给数据发送方。<br>原理：当数据接收方收到一个TCP包之后，先不回应ACK包，而是等待一定的时间（本例中是40ms），直到</p>
+        <h2 id="u6982_u8FF0"><a href="#u6982_u8FF0" class="headerlink" title="概述"></a>概述</h2><blockquote>
+<p>零拷贝是我们经常听到的一个术语，要解释清楚这个术语，我个人觉得需要说明三个场景。</p>
 <ol>
-<li>数据接收方发送一份响应数据<br>当数据接收方，收到足够的数据，进行业务处理后，一般会返回业务响应，这时会立即返回：业务响应+ACK。</li>
-<li>接收到连续的TCP包<br>当服务接收端接收到1号TCP包后，会先延迟发送1号包的ACK，等待2号包到来，2号包到达时，则立即返回一次ACK；当3号包到来时，会延迟3号包的ACK，等待4号包到来，4号包到达时，则立即返回一次ACK……<br>那么，这样就造成偶数序号的TCP包到达的时候，就会立即返回一次ACK；而奇数序号的包到达时，则延迟ACK响应，等待后续的偶数包到来。</li>
-<li>超时<br>超过40ms。</li>
+<li>Java中的DirectBuffer；</li>
+<li>Java中的transferTo，底层就是Linux的sendFile；</li>
+<li>Linux中的Direct IO；</li>
+</ol>
+<p>本系列分三篇来讲解。</p>
+</blockquote>
+<h2 id="DirectBuffer_u7684_u7279_u70B9"><a href="#DirectBuffer_u7684_u7279_u70B9" class="headerlink" title="DirectBuffer的特点"></a>DirectBuffer的特点</h2><blockquote>
+<p>Java中的DirectBuffer的具体用法和API，此处不再赘述。我们主要理解DirectBuffer的原理。</p>
+<ol>
+<li>DirectBuffer是分配在JVM堆外的进程地址空间的，因此，相对于在JVM堆中分配的堆内Buffer，也叫做堆外Buffer。这个地方的堆外，从操作系统的角度讲其实就是JVM进程的地址空间，那么自然也就属于用户空间了，堆也属于JVM进程地址空间。为什么我们要强调用户空间呢？其实是后边的篇幅说明DirectBuffer的“零拷贝”意义。</li>
+<li>DirectBuffer其实是JVM本地代码经过malloc系统调用，在当前JVM进程的地址空间申请的一段内存空间。它的引用依然保存在JVM堆中，只是其存储空间在堆外而已。DirectBuffer的引用一般是直接在JVM堆中的老年代创建的，因此，其回收的时机只有在JVM进行Full GC时。基于这个回收特点，我们需要特别注意，不要频繁的分配大量的DirectBuffer，否则很容易导致内存溢出，而且这个时候的溢出，不是堆溢出，而是本地内存溢出。</li>
 </ol>
 </blockquote>
-<p><strong>TCP-Nagle Algorithm</strong></p>
-<blockquote>
-<p>目的：用于防止发送大量的小包，降低网络资源消耗。<br>原理：当数据发送方写入TCP缓冲区的数据小于MSS（最大报文长度），则暂不发送，等待写入的数据达到MSS再发送；除非在等待的过程中，发送端发送出去的所有TCP报文均已被ACK，这样就可以不用等待写入数据达到MSS，直接发送出去了。我们称没有达到MSS的报文为小包的话，那么其实TCP-Nagle Algorithm就保证了一个连接在一个时刻，有且只能有一个没有被确认的小包。<br>关于以上两点，可以参考这篇文章，介绍的很详细：<a href="http://www.stuartcheshire.org/papers/NagleDelayedAck/" target="_blank" rel="external">http://www.stuartcheshire.org/papers/NagleDelayedAck/</a></p>
+<h2 id="DirectBuffer_u7684_u597D_u5904"><a href="#DirectBuffer_u7684_u597D_u5904" class="headerlink" title="DirectBuffer的好处"></a>DirectBuffer的好处</h2><blockquote>
+<p>DirectBuffer带来的性能的提升，其根本原因是节省了一次从堆内空间到堆外空间的Buffer拷贝，下图可以说明这个过程。其实省去的就是红线所示的从堆内存到本地内存的拷贝。</p>
 </blockquote>
-<p>##过程分析<br>该消息中间件系统在做性能测试时，SDK没有禁用Nagle算法，而Server端禁用了；测试时的消息长度为消息头（12）+消息体（14）Byte，TCP MSS是1460Byte；服务端和SDK交互采用类似TCP三次握手的确认机制来保证高可靠性。那么考虑如下过程：</p>
+<p><img src="http://7xj5jf.com1.z0.glb.clouddn.com/DirectBuffer_1.png" alt=""></p>
+<p>##sendFile</p>
 <blockquote>
-<ol>
-<li>SDK端发送第一条消息，写入了TCP Buffer，虽然未达到MSS，但是因为没有需要确认的包，所以会立即发送；</li>
-<li>Server端收到TCP包后，就延迟ACK响应；同时SDK端由于启用了Nagle算法，并且存在没有ACK的包，因此处于等待中；</li>
-<li>Server端业务层解包进行业务处理，处理完成后，立即发送业务响应，并捎带ACK返回给SDK；</li>
-<li>SDK端收到了Server端返回的响应和ACK后，立即回复业务确认消息，并捎带ACK；</li>
-<li>由于Server端收到业务确认消息后，不用再返回响应给SDK，因此延迟ACK确认；</li>
-<li>SDK端发送第二条消息，但是因为启用了Nagle算法，所以必须等待ACK。直到第5步的延迟确认到达，则立即发送第二条消息。</li>
-</ol>
+<p>待补充……</p>
+<p>##DirectIO<br>待补充……</p>
 </blockquote>
-<p>Tcpdump抓包如下：<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">2015-05-25 18:42:49.736897 IP 100.84.52.90.58237 &#62; 100.84.73.45.9090: P 71:101(30) ack 20 win 16420&#10;E..FU3@.=..OdT4ZdTI-.&#125;#...(.R.mpP.@$.).......)....&#10;queueAThis is test &#10;2015-05-25 18:42:49.737763 IP 100.84.73.45.9090 &#62; 100.84.52.90.58237: P 20:39(19) ack 101 win 46&#10;E..;Fn@.@...dTI-dT4Z#..&#125;R.mp..)&#9;P...F].......*......SUCCESS&#10;2015-05-25 18:42:49.744738 IP 100.84.52.90.58237 &#62; 100.84.73.45.9090: P 101:113(12) ack 39 win 16415&#10;E..4U4@.=..`dT4ZdTI-.&#125;#...)&#9;R.m.P.@.d........4......&#10;2015-05-25 18:42:49.784810 IP 100.84.73.45.9090 &#62; 100.84.52.90.58237: . ack 113 win 46&#10;E..(Fo@.@..1dTI-dT4Z#..&#125;R.m...).P.......&#10;2015-05-25 18:42:49.785438 IP 100.84.52.90.58237 &#62; 100.84.73.45.9090: P 113:143(30) ack 39 win 16415&#10;E..FU5@.=..MdT4ZdTI-.&#125;#...).R.m.P.@..........)....&#10;queueAThis is test &#10;2015-05-25 18:42:49.785450 IP 100.84.73.45.9090 &#62; 100.84.52.90.58237: . ack 143 win 46&#10;E..(Fp@.@..0dTI-dT4Z#..&#125;R.m...)3P.......&#10;2015-05-25 18:42:49.786147 IP 100.84.73.45.9090 &#62; 100.84.52.90.58237: P 39:58(19) ack 143 win 46&#10;E..;Fq@.@...dTI-dT4Z#..&#125;R.m...)3P...F].......*......SUCCESS&#10;2015-05-25 18:42:49.790470 IP 100.84.52.90.58237 &#62; 100.84.73.45.9090: P 143:173(30) ack 58 win 16410&#10;E..(Fo@.@..1dTI-dT4Z#..&#125;R.m...).P.......</span><br></pre></td></tr></table></figure></p>
-<p><strong>总结：通过以上过程可以发现，由于第5步的延迟ACK，导致SDK发送消息延迟，最终导致了性能下降。如果SDK端关闭的Nagle算法，SDK就可以立即发送第二条消息，而不会受到Nagle算法的约束，一直等待第5步的ACK到达。</strong></p>
-<p>##代码说明<br>在Netty中，可以通过设置tcpNoDelay选项，开启或者禁用Nagle算法。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 用来禁用TCP的Nagle算法。</span></span><br><span class="line">bootstrap.setOption(<span class="string">"tcpNoDelay"</span>, <span class="keyword">true</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// Netty底层其实就是使用JDK中的Socket.class的setTcpNoDelay方法来设置。</span></span><br><span class="line"><span class="comment">/**</span><br><span class="line">* Enable/disable TCP_NODELAY (disable/enable Nagle's algorithm).</span><br><span class="line">*/</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setTcpNoDelay</span><span class="params">(<span class="keyword">boolean</span> on)</span> <span class="keyword">throws</span> SocketException</span>;</span><br></pre></td></tr></table></figure></p>
 
         
         
@@ -519,13 +515,13 @@
 
 <div class="article-categories">
   <span></span>
-  <a class="article-category-link" href="/categories/协议/">协议</a>
+  <a class="article-category-link" href="/categories/并发编程/">并发编程</a>
 </div>
 
 
   <div class="article-tags">
   
-  <span></span> <a href="/tags/Netty/">Netty</a><a href="/tags/TCP/">TCP</a>
+  <span></span> <a href="/tags/DirectBuffer/">DirectBuffer</a><a href="/tags/DirectIO/">DirectIO</a><a href="/tags/SendFile/">SendFile</a>
   </div>
 
 </div>

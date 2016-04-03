@@ -27,7 +27,7 @@ select轮询函数
 函数定义：
 
  1234567int select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exeptfds, struct timeval *timeout);// fd_set操作宏void FD_SET(int">
-<meta property="og:updated_time" content="2016-04-03T04:06:45.731Z">
+<meta property="og:updated_time" content="2016-04-03T04:09:11.366Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="【原创】Linux学习系列-轮询函数">
 <meta name="twitter:description" content="理解这三个轮询函数差异的关键在于理解其轮询的文件描述符（socket也是文件）的数据结构。
@@ -136,10 +136,12 @@ select轮询函数
 </blockquote>
 <h2 id="poll_u8F6E_u8BE2_u51FD_u6570"><a href="#poll_u8F6E_u8BE2_u51FD_u6570" class="headerlink" title="poll轮询函数"></a>poll轮询函数</h2><blockquote>
 <p>函数定义：<br> <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">poll</span><span class="params">(<span class="keyword">struct</span> pollfd *fds, nfds_t nfds, <span class="keyword">int</span> timeout)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> pollfd</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">int</span> fd;  <span class="comment">//文件描述符</span></span><br><span class="line">    <span class="keyword">short</span> events;  <span class="comment">//注册的事件</span></span><br><span class="line">    <span class="keyword">short</span> revents  <span class="comment">//实际发生的事件，由内核填充</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+</blockquote>
 <ul>
 <li>fds是需要监听的文件描述符集合，它是一个pollfd结构体的数组。</li>
 <li>nfds是监听的文件描述符的数量，也就是fds数组的长度。</li>
 </ul>
+<blockquote>
 <p>说明：与select相比这种函数设计清晰简洁，将文件描述符和事件通过pollfd结构体来进行了绑定，并且区分了注册的时间和实际发生的事件。但是其和select一样，最终轮询的结果都是所有已经注册的文件描述符的集合。</p>
 </blockquote>
 <h2 id="epoll_u8F6E_u8BE2_u51FD_u6570"><a href="#epoll_u8F6E_u8BE2_u51FD_u6570" class="headerlink" title="epoll轮询函数"></a>epoll轮询函数</h2><blockquote>

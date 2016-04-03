@@ -11,42 +11,36 @@
     
 
     
-    <meta name="description" content="##背景介绍
-
+    <meta name="description" content="背景介绍
 该消息中间件由三个子系统组成：客户端SDK、Server和控制管理中心（Admin）。我们所说的主备主要是针对Server，而Server的节点是局部有状态的，具体而言就是发布无状态，但是拉取有状态。因此，对于发布而言，由于分布式部署所以本身具备高可用性；但是对于拉取，就存在单点的可用性问题。
 
-##主备切换的关键问题
-
+主备切换的关键问题
 实现主备切换，需要解决两个核心问题：
 
-解决主备之间状态检测">
+解决主备之间状态检测、通信和决策">
 <meta property="og:type" content="article">
 <meta property="og:title" content="【原创】消息中间件主备方案选型实践">
-<meta property="og:url" content="http://yoursite.com/2016/04/03/主备倒换方案选型/index.html">
+<meta property="og:url" content="http://yoursite.com/2016/04/03/消息中间件主备方案选型实践/index.html">
 <meta property="og:site_name" content="Ma Haijin">
-<meta property="og:description" content="##背景介绍
-
+<meta property="og:description" content="背景介绍
 该消息中间件由三个子系统组成：客户端SDK、Server和控制管理中心（Admin）。我们所说的主备主要是针对Server，而Server的节点是局部有状态的，具体而言就是发布无状态，但是拉取有状态。因此，对于发布而言，由于分布式部署所以本身具备高可用性；但是对于拉取，就存在单点的可用性问题。
 
-##主备切换的关键问题
-
+主备切换的关键问题
 实现主备切换，需要解决两个核心问题：
 
-解决主备之间状态检测">
+解决主备之间状态检测、通信和决策">
 <meta property="og:image" content="http://7xj5jf.com1.z0.glb.clouddn.com/主备切换序列图.png">
 <meta property="og:image" content="http://7xj5jf.com1.z0.glb.clouddn.com/主备恢复序列图.png">
-<meta property="og:updated_time" content="2015-11-06T08:26:38.000Z">
+<meta property="og:updated_time" content="2016-04-03T03:47:55.759Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="【原创】消息中间件主备方案选型实践">
-<meta name="twitter:description" content="##背景介绍
-
+<meta name="twitter:description" content="背景介绍
 该消息中间件由三个子系统组成：客户端SDK、Server和控制管理中心（Admin）。我们所说的主备主要是针对Server，而Server的节点是局部有状态的，具体而言就是发布无状态，但是拉取有状态。因此，对于发布而言，由于分布式部署所以本身具备高可用性；但是对于拉取，就存在单点的可用性问题。
 
-##主备切换的关键问题
-
+主备切换的关键问题
 实现主备切换，需要解决两个核心问题：
 
-解决主备之间状态检测">
+解决主备之间状态检测、通信和决策">
 
     
     <link rel="alternative" href="/atom.xml" title="Ma Haijin" type="application/atom+xml">
@@ -106,14 +100,14 @@
 		<header class="article-info clearfix">
   <h1 itemprop="name">
     
-      <a href="/2016/04/03/主备倒换方案选型/" title="【原创】消息中间件主备方案选型实践" itemprop="url">【原创】消息中间件主备方案选型实践</a>
+      <a href="/2016/04/03/消息中间件主备方案选型实践/" title="【原创】消息中间件主备方案选型实践" itemprop="url">【原创】消息中间件主备方案选型实践</a>
   </h1>
   <p class="article-author">By
        
 		<a href="/about" title="马海金" target="_blank" itemprop="author">马海金</a>
 		
   <p class="article-time">
-    <time datetime="2016-04-03T03:40:33.594Z" itemprop="datePublished"> 發表於 2016-04-03</time>
+    <time datetime="2016-04-03T03:47:55.759Z" itemprop="datePublished"> 發表於 2016-04-03</time>
     
   </p>
 </header>
@@ -122,16 +116,14 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目錄</strong>
 		
-			
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u80CC_u666F_u4ECB_u7ECD"><span class="toc-number">1.</span> <span class="toc-text">背景介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u4E3B_u5907_u5207_u6362_u7684_u5173_u952E_u95EE_u9898"><span class="toc-number">2.</span> <span class="toc-text">主备切换的关键问题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u4E3B_u5907_u5207_u6362_u601D_u8DEF"><span class="toc-number">3.</span> <span class="toc-text">主备切换思路</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u65B9_u6848_u6BD4_u8F83"><span class="toc-number">4.</span> <span class="toc-text">方案比较</span></a></li></ol>
 		
 		</div>
 		
-		<p>##背景介绍</p>
-<blockquote>
+		<h2 id="u80CC_u666F_u4ECB_u7ECD"><a href="#u80CC_u666F_u4ECB_u7ECD" class="headerlink" title="背景介绍"></a>背景介绍</h2><blockquote>
 <p>该消息中间件由三个子系统组成：客户端SDK、Server和控制管理中心（Admin）。我们所说的主备主要是针对Server，而Server的节点是局部有状态的，具体而言就是发布无状态，但是拉取有状态。因此，对于发布而言，由于分布式部署所以本身具备高可用性；但是对于拉取，就存在单点的可用性问题。</p>
 </blockquote>
-<p>##主备切换的关键问题</p>
-<blockquote>
+<h2 id="u4E3B_u5907_u5207_u6362_u7684_u5173_u952E_u95EE_u9898"><a href="#u4E3B_u5907_u5207_u6362_u7684_u5173_u952E_u95EE_u9898" class="headerlink" title="主备切换的关键问题"></a>主备切换的关键问题</h2><blockquote>
 <p>实现主备切换，需要解决两个核心问题：</p>
 <ol>
 <li>解决主备之间状态检测、通信和决策问题。<br>通过心跳检测来得知互相之间的状态，一旦得知对方状态异常需要接管对方的资源继续提供服务。</li>
@@ -139,16 +131,14 @@
 </ol>
 <p>任何一套主备切换方案都需要解决这两个基本问题。</p>
 </blockquote>
-<p>##主备切换思路</p>
-<blockquote>
+<h2 id="u4E3B_u5907_u5207_u6362_u601D_u8DEF"><a href="#u4E3B_u5907_u5207_u6362_u601D_u8DEF" class="headerlink" title="主备切换思路"></a>主备切换思路</h2><blockquote>
 <ol>
 <li>故障检测</li>
 <li>状态和决策</li>
 <li>资源切换</li>
 </ol>
 </blockquote>
-<p>##方案比较</p>
-<ol>
+<h2 id="u65B9_u6848_u6BD4_u8F83"><a href="#u65B9_u6848_u6BD4_u8F83" class="headerlink" title="方案比较"></a>方案比较</h2><ol>
 <li><strong>Zookeeper</strong><blockquote>
 <p>如果使用Zookeeper，每组主备Server需要部署Zookeeper，作为Zookeeper Server；SDK作为Zookeeper Client，建立和主备Server的连接，并且监控Zookeeper Server的事件。如果发生不可用，则可以通过监听到的事件，来触发主备切换。那么其实，我们使用Zookeeper只解决了第一个问题。至于第二个问题，如果是Single模式，资源转移可以通过DB中间件来共享资源解决；如果是Master-Slave模式，则需要Server自身的开发来解决。</p>
 </blockquote>
@@ -199,7 +189,7 @@
 
 	<div class="article-share" id="share">
 	
-	  <div data-url="http://yoursite.com/2016/04/03/主备倒换方案选型/" data-title="【原创】消息中间件主备方案选型实践 | Ma Haijin" data-tsina="null" class="share clearfix">
+	  <div data-url="http://yoursite.com/2016/04/03/消息中间件主备方案选型实践/" data-title="【原创】消息中间件主备方案选型实践 | Ma Haijin" data-tsina="null" class="share clearfix">
 	  </div>
 	
 	</div>
@@ -231,7 +221,7 @@
   <div id="toc" class="toc-aside">
   <strong class="toc-title">文章目錄</strong>
  
- 
+ <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u80CC_u666F_u4ECB_u7ECD"><span class="toc-number">1.</span> <span class="toc-text">背景介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u4E3B_u5907_u5207_u6362_u7684_u5173_u952E_u95EE_u9898"><span class="toc-number">2.</span> <span class="toc-text">主备切换的关键问题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u4E3B_u5907_u5207_u6362_u601D_u8DEF"><span class="toc-number">3.</span> <span class="toc-text">主备切换思路</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u65B9_u6848_u6BD4_u8F83"><span class="toc-number">4.</span> <span class="toc-text">方案比较</span></a></li></ol>
  
   </div>
 
@@ -321,6 +311,10 @@
 			
 		
 			
+				<li><a href="/tags/架构/" title="架构">架构<sup>1</sup></a></li>
+			
+		
+			
 				<li><a href="/tags/sysbench/" title="sysbench">sysbench<sup>1</sup></a></li>
 			
 		
@@ -342,10 +336,6 @@
 		
 			
 				<li><a href="/tags/项目管理/" title="项目管理">项目管理<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/架构/" title="架构">架构<sup>1</sup></a></li>
 			
 		
 			
